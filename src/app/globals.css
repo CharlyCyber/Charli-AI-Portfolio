@@ -1,0 +1,889 @@
+@import "tailwindcss";
+@import "tw-animate-css";
+
+@custom-variant dark (&:is(.dark *));
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --font-sans: var(--font-switzer);
+  --font-mono: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  --color-sidebar-ring: var(--sidebar-ring);
+  --color-sidebar-border: var(--sidebar-border);
+  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+  --color-sidebar-accent: var(--sidebar-accent);
+  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+  --color-sidebar-primary: var(--sidebar-primary);
+  --color-sidebar-foreground: var(--sidebar-foreground);
+  --color-sidebar: var(--sidebar);
+  --color-chart-5: var(--chart-5);
+  --color-chart-4: var(--chart-4);
+  --color-chart-3: var(--chart-3);
+  --color-chart-2: var(--chart-2);
+  --color-chart-1: var(--chart-1);
+  --color-ring: var(--ring);
+  --color-input: var(--input);
+  --color-border: var(--border);
+  --color-destructive: var(--destructive);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-accent: var(--accent);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-muted: var(--muted);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-secondary: var(--secondary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-primary: var(--primary);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-popover: var(--popover);
+  --color-card-foreground: var(--card-foreground);
+  --color-card: var(--card);
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 4px);
+  /* Cosmos-style brand tokens */
+  --color-ink: #0f1011;
+  --color-ink-soft: #5c5f63;
+  --color-paper: #ffffff;
+  --color-paper-dim: #f3f4f6;
+  --color-lime: #c8f24e;
+  --color-lime-deep: #9fd600;
+}
+
+/* ── Self-hosted fonts ─────────────────────────────────────── */
+@font-face {
+  font-family: "Switzer";
+  src: url("/fonts/switzer-400.woff2") format("woff2");
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: "Switzer";
+  src: url("/fonts/switzer-500.woff2") format("woff2");
+  font-weight: 500;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: "Switzer";
+  src: url("/fonts/switzer-600.woff2") format("woff2");
+  font-weight: 600;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: "Switzer";
+  src: url("/fonts/switzer-700.woff2") format("woff2");
+  font-weight: 700;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: "Anton";
+  src: url("/fonts/anton.woff2") format("woff2");
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: "Geist";
+  src: url("/fonts/geist-var.woff2") format("woff2");
+  font-weight: 100 900;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: "Instrument Serif";
+  src: url("/fonts/instrument-serif-italic.woff2") format("woff2");
+  font-weight: 400;
+  font-style: italic;
+  font-display: swap;
+}
+
+/* ── Liquid Sculpture Hero (.sh-*) ───────────────────────────
+   Hero editorial: escultura que se licúa bajo el cursor (WebGL2).
+   Basado en "Liquid Sculpture Hero" (MIT) de gughigug / 21st.dev. */
+.sh-root {
+  position: relative;
+  width: 100%;
+  height: var(--sh-h, 100svh);
+  overflow: hidden;
+  isolation: isolate;
+  container-type: size;
+  transition: background-color 0.6s ease, color 0.6s ease;
+  background: var(--sh-bg);
+  color: var(--sh-fg);
+  font-family: var(--sh-body);
+  -webkit-font-smoothing: antialiased;
+  touch-action: pan-y;
+  display: flex;
+  flex-direction: column;
+  box-sizing: border-box;
+}
+.sh-root *, .sh-root *::before, .sh-root *::after { box-sizing: border-box; }
+.sh-stage { position: absolute; inset: 0; z-index: 0; pointer-events: none; }
+.sh-canvas {
+  position: absolute; inset: 0; width: 100%; height: 100%;
+  display: block; opacity: 0; transition: opacity 0.5s ease;
+}
+.sh-fallback {
+  position: absolute; display: block; max-width: none;
+  user-select: none; -webkit-user-drag: none;
+  transition: opacity 0.5s ease; opacity: 0;
+}
+.sh-root[data-gl="on"] .sh-canvas { opacity: 1; }
+.sh-root[data-gl="on"] .sh-fallback { opacity: 0; }
+.sh-backdrop {
+  position: absolute; left: 50%; top: 50%; z-index: 0;
+  transform: translate(-50%, -50%);
+  white-space: nowrap; pointer-events: none; user-select: none;
+  font-family: var(--sh-head); font-weight: 600;
+  letter-spacing: -0.06em; line-height: 0.8;
+  font-size: clamp(10rem, 38cqw, 52rem);
+  color: color-mix(in srgb, var(--sh-fg) 5%, transparent);
+}
+.sh-hint {
+  position: absolute; z-index: 1;
+  transform: translate(-50%, 0);
+  display: flex; align-items: center; gap: 10px; white-space: nowrap;
+  font-size: 11px; letter-spacing: 0.14em; text-transform: uppercase;
+  opacity: 0.5; pointer-events: none; transition: opacity 0.8s ease;
+}
+.sh-hint::before {
+  content: ""; width: 6px; height: 6px; border-radius: 50%;
+  background: currentColor; animation: sh-pulse 2.4s ease-in-out infinite;
+}
+.sh-root[data-touched="1"] .sh-hint { opacity: 0; }
+@keyframes sh-pulse {
+  0%, 100% { transform: scale(0.6); opacity: 0.45; }
+  50% { transform: scale(1); opacity: 1; }
+}
+.sh-spacer { flex: 1 1 auto; min-height: 0; }
+.sh-content {
+  position: relative; z-index: 2;
+  display: grid; grid-template-columns: minmax(0, 1.7fr) minmax(0, 1fr);
+  align-items: end; gap: clamp(24px, 4cqw, 72px);
+  padding: 0 clamp(20px, 3.2cqw, 48px) clamp(28px, 3.4cqw, 52px);
+}
+/* bloque eyebrow+h1 (envoltorio): en el hero móvil ≤639px viaja
+   como UNA sola unidad arriba (letras ARRIBA-IZQUIERDA bajo el
+   logo); min-width 0 para que el titular que no envuelve nunca
+   ensanche su pista del grid/flex */
+.sh-head { min-width: 0; }
+.sh-eyebrow {
+  font-size: 12px; letter-spacing: 0.12em; text-transform: uppercase;
+  opacity: 0.62; margin: 0 0 clamp(14px, 1.6cqw, 22px);
+  display: flex; align-items: center; gap: 12px;
+}
+.sh-eyebrow::before { content: ""; width: 28px; height: 1px; background: currentColor; opacity: 0.7; }
+.sh-h1 {
+  font-family: var(--sh-head); font-weight: 500;
+  font-size: clamp(40px, min(6.6cqw, 11.5cqh), 124px);
+  line-height: 0.92; letter-spacing: -0.045em; margin: 0;
+  text-wrap: balance;
+}
+.sh-h1 .sh-line { display: block; }
+.sh-accent {
+  font-family: var(--sh-accent); font-style: italic; font-weight: 400;
+  letter-spacing: -0.02em; color: var(--sh-acc);
+}
+.sh-aside { max-width: 400px; justify-self: end; padding-bottom: 0.6em; }
+.sh-body {
+  font-size: clamp(15px, 1.1cqw, 17px); line-height: 1.5;
+  letter-spacing: -0.01em; margin: 0 0 26px; opacity: 0.78; text-wrap: pretty;
+}
+.sh-ctas { display: flex; flex-wrap: wrap; align-items: center; gap: 22px; }
+.sh-btn {
+  display: inline-flex; align-items: center; gap: 10px; height: 46px;
+  padding: 0 22px; border-radius: 999px; background: var(--sh-fg);
+  color: var(--sh-bg); text-decoration: none; font-size: 14.5px;
+  font-weight: 500; letter-spacing: -0.01em;
+  transition: transform 0.3s cubic-bezier(0.2, 0.7, 0.2, 1), opacity 0.2s;
+}
+.sh-btn:hover { transform: translateY(-1px); }
+.sh-btn svg, .sh-txt svg { transition: transform 0.3s cubic-bezier(0.2, 0.7, 0.2, 1); }
+.sh-btn:hover svg, .sh-txt:hover svg { transform: translateX(3px); }
+.sh-txt {
+  display: inline-flex; align-items: center; gap: 8px; color: inherit;
+  text-decoration: none; font-size: 14.5px; font-weight: 500;
+  letter-spacing: -0.01em; padding: 4px 0;
+  border-bottom: 1px solid color-mix(in srgb, var(--sh-fg) 30%, transparent);
+}
+.sh-root a:focus-visible { outline: 2px solid var(--sh-fg); outline-offset: 4px; }
+.sh-credit {
+  position: absolute; z-index: 2; right: clamp(20px, 3.2cqw, 48px); bottom: 10px;
+  font-size: 10px; letter-spacing: 0.06em; color: inherit; opacity: 0.38;
+  text-decoration: none;
+}
+.sh-credit:hover { opacity: 0.8; }
+.sh-tilt-pill {
+  position: absolute; z-index: 3; left: 50%; bottom: 64px;
+  transform: translateX(-50%);
+  display: inline-flex; align-items: center; gap: 8px;
+  padding: 10px 18px; border-radius: 999px;
+  background: var(--sh-fg); color: var(--sh-bg);
+  font-family: var(--sh-body); font-size: 13px; font-weight: 500;
+  letter-spacing: -0.01em; border: none; cursor: pointer;
+  box-shadow: 0 12px 32px -12px color-mix(in srgb, var(--sh-fg) 45%, transparent);
+  animation: sh-pill-in 0.5s cubic-bezier(0.2, 0.7, 0.2, 1);
+}
+.sh-tilt-pill:hover { transform: translateX(-50%) translateY(-2px); }
+@keyframes sh-pill-in {
+  from { opacity: 0; transform: translateX(-50%) translateY(12px); }
+  to { opacity: 1; transform: translateX(-50%) translateY(0); }
+}
+@container (max-width: 1023px) {
+  .sh-content { grid-template-columns: 1fr; gap: 28px; }
+  .sh-aside { justify-self: start; max-width: 520px; padding-bottom: 0; }
+  .sh-h1 { font-size: clamp(40px, min(9.5cqw, 9cqh), 96px); }
+}
+@container (max-width: 639px) {
+  .sh-h1 { font-size: clamp(34px, min(11.5cqw, 7.2cqh), 60px); line-height: 0.94; }
+  .sh-body { font-size: 15px; margin-bottom: 20px; }
+  .sh-eyebrow { font-size: 11px; }
+  .sh-ctas { gap: 18px; }
+  .sh-btn { height: 48px; }
+  /* Hero móvil: el contenido pasa a columna que llena todo el alto
+     (el spacer colapsa) y reparte espacio — letras del hero
+     ARRIBA-IZQUIERDA bajo el navbar (~70px → padding-top 88px),
+     aside abajo. padding-bottom 78px para que los CTAs no queden
+     bajo el botón flotante «Descargar código». */
+  .sh-content {
+    flex: 1 1 auto;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    align-items: stretch;
+    padding-top: 88px;
+    padding-bottom: 78px;
+  }
+  .sh-head { flex: 0 0 auto; }
+  .sh-spacer { flex: 0; }
+  .sh-credit { right: auto; left: 50%; transform: translateX(-50%); }
+  .sh-tilt-pill { bottom: 96px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .sh-hint::before { animation: none; }
+  .sh-canvas, .sh-fallback, .sh-btn, .sh-btn svg, .sh-txt svg { transition: none; }
+}
+
+/* ── Looping Words with Selector (Osmo) — titular en bucle del hero ──
+   Réplica del CSS original del recurso de Osmo (osmo.supply):
+   ventana de 3 líneas (calc(0.9em * 3)) — la palabra central nítida
+   y las vecinas fundidas arriba/abajo; lista en MAYÚSCULAS anclada
+   a la IZQUIERDA, alineada con el eyebrow del hero (CHARLI AI —
+   Tecnólogo creativo en IA); selector de 0.9em con 4 esquinas en L
+   (0.125em, trazo 0.035em, negro) anclado al mismo borde
+   izquierdo, abrazando el ancho de la palabra en curso. El fundido
+   de las vecinas es una MÁSCARA del contenedor (transparente en los
+   bordes 5%→40% / 60%→95%): no pinta ningún color encima del fondo
+   real del hero — sin rectángulo sólido detrás de las palabras.
+   Todo en em → escala con el font-size del titular. */
+.sh-h1--loop {
+  /* la ventana de 3 palabras mide 2.7em: fuente algo menor que el
+     titular a dos líneas que sustituye para no comerse el hero */
+  font-weight: 600;
+  font-size: clamp(40px, min(6cqw, 10cqh), 104px);
+}
+.looping-words {
+  --lw-edge: #000000; /* negro (antes azul eléctrico de la referencia) */
+  position: relative;
+  display: block;
+  width: 100%;
+  height: 2.7em;        /* calc(0.9em * 3) — ventana de 3 palabras */
+  line-height: 0.9;
+}
+.looping-words__containers {
+  position: relative;
+  overflow: hidden;
+  width: 100%;
+  height: 100%;
+  /* Fundido de las palabras vecinas como MÁSCARA (no como capa de
+     color): revela el fondo real del hero — sin rectángulo. */
+  -webkit-mask-image: linear-gradient(180deg,
+    transparent 5%,
+    #000 40%,
+    #000 60%,
+    transparent 95%);
+  mask-image: linear-gradient(180deg,
+    transparent 5%,
+    #000 40%,
+    #000 60%,
+    transparent 95%);
+}
+.looping-words__list {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  flex-wrap: nowrap;
+  align-items: flex-start; /* palabras ancladas a la izquierda, */
+  text-align: left;        /* emparejadas con el eyebrow del hero */
+  text-transform: uppercase;
+  list-style: none;
+  white-space: nowrap;
+  margin: 0;
+  padding: 0;
+  will-change: transform;
+}
+.looping-words__list-item {
+  width: fit-content;
+}
+.looping-words__p {
+  margin: 0;
+}
+.looping-words__selector {
+  position: absolute;
+  left: 0;               /* anclado al mismo borde izquierdo que */
+  top: 50%;              /* las palabras y el eyebrow del hero */
+  width: 100%;
+  height: 0.9em;
+  opacity: 0;            /* lo revela el JS al montar el bucle */
+  pointer-events: none;
+  transform: translateY(-50%);
+}
+.looping-words__edge {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 0.125em;
+  height: 0.125em;
+  border-top: 0.035em solid var(--lw-edge);
+  border-left: 0.035em solid var(--lw-edge);
+}
+.looping-words__edge.is--2 {
+  left: auto;
+  right: 0;
+  transform: rotate(90deg);
+}
+.looping-words__edge.is--3 {
+  left: auto;
+  top: auto;
+  right: 0;
+  bottom: 0;
+  transform: rotate(180deg);
+}
+.looping-words__edge.is--4 {
+  top: auto;
+  bottom: 0;
+  transform: rotate(270deg);
+}
+@container (max-width: 1023px) {
+  .sh-h1--loop { font-size: clamp(36px, min(7.5cqw, 9.5cqh), 88px); }
+}
+@container (max-width: 639px) {
+  .sh-h1--loop { font-size: clamp(30px, min(11cqw, 6.6cqh), 48px); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .looping-words__list { will-change: auto; }
+}
+
+:root {
+  --radius: 0.625rem;
+  --background: #ffffff;
+  --foreground: #0f1011;
+  --card: #ffffff;
+  --card-foreground: #0f1011;
+  --popover: #ffffff;
+  --popover-foreground: #0f1011;
+  --primary: #0f1011;
+  --primary-foreground: #ffffff;
+  --secondary: #f3f4f6;
+  --secondary-foreground: #0f1011;
+  --muted: #f3f4f6;
+  --muted-foreground: #5c5f63;
+  --accent: #f3f4f6;
+  --accent-foreground: #0f1011;
+  --destructive: oklch(0.577 0.245 27.325);
+  --border: #e8e8ea;
+  --input: #e8e8ea;
+  --ring: #0f1011;
+  --chart-1: oklch(0.646 0.222 41.116);
+  --chart-2: oklch(0.6 0.118 184.704);
+  --chart-3: oklch(0.398 0.07 227.392);
+  --chart-4: oklch(0.828 0.189 84.429);
+  --chart-5: oklch(0.769 0.188 70.08);
+  --font-switzer: "Switzer", ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+}
+
+.dark {
+  --background: #0a0a0b;
+  --foreground: #ffffff;
+  --card: #131315;
+  --card-foreground: #ffffff;
+  --popover: #131315;
+  --popover-foreground: #ffffff;
+  --primary: #ffffff;
+  --primary-foreground: #0f1011;
+  --secondary: #1b1b1e;
+  --secondary-foreground: #ffffff;
+  --muted: #1b1b1e;
+  --muted-foreground: #9ca0a6;
+  --accent: #1b1b1e;
+  --accent-foreground: #ffffff;
+  --border: rgba(255, 255, 255, 0.1);
+  --input: rgba(255, 255, 255, 0.15);
+  --ring: #9ca0a6;
+}
+
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+  html {
+    scroll-behavior: auto;
+    /* framer-motion useScroll targets measure against the scroll container;
+       a non-static html keeps measurements + console warnings in check */
+    position: relative;
+  }
+  body {
+    @apply bg-background text-foreground;
+    font-family: var(--font-switzer);
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+    overflow-x: clip;
+  }
+  ::selection {
+    background: #0f1011;
+    color: #c8f24e;
+  }
+  ::-webkit-scrollbar {
+    width: 10px;
+  }
+  ::-webkit-scrollbar-track {
+    background: #f3f4f6;
+  }
+  ::-webkit-scrollbar-thumb {
+    background: #c9ccd1;
+    border-radius: 8px;
+    border: 2px solid #f3f4f6;
+  }
+  ::-webkit-scrollbar-thumb:hover {
+    background: #0f1011;
+  }
+}
+
+/* ── Lenis smooth scroll ───────────────────────────────────── */
+html.lenis,
+html.lenis body {
+  height: auto;
+}
+.lenis.lenis-smooth {
+  scroll-behavior: auto !important;
+}
+.lenis.lenis-smooth [data-lenis-prevent] {
+  overscroll-behavior: contain;
+}
+.lenis.lenis-stopped {
+  overflow: hidden;
+}
+
+/* ── Typography helpers ────────────────────────────────────── */
+/* Números y cifras: Switzer con dígitos tabulares (sin estilo digital) */
+.font-num {
+  font-family: var(--font-switzer);
+  font-weight: 500;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: -0.01em;
+}
+.label-caps {
+  font-size: 12px;
+  font-weight: 500;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--muted-foreground);
+}
+.display-1 {
+  font-size: clamp(2.5rem, 6.4vw, 6rem);
+  line-height: 1.02;
+  letter-spacing: -0.03em;
+  font-weight: 500;
+}
+.display-2 {
+  font-size: clamp(2rem, 4.6vw, 4rem);
+  line-height: 1.05;
+  letter-spacing: -0.025em;
+  font-weight: 500;
+}
+/* Wordmark del hero — ultracompactada black estilo "NAGASAKI"
+   (condensed monoline, terminales planos, tracking apretado) */
+.wordmark {
+  font-family: "Anton", "Switzer", sans-serif;
+  font-size: clamp(4.25rem, 19vw, 20rem);
+  line-height: 0.9;
+  letter-spacing: 0.005em;
+  font-weight: 400;
+  text-transform: uppercase;
+  font-variation-settings: normal;
+}
+/* Contorno del "AI" — stroke acorde al grosor de Anton */
+.wordmark-outline {
+  color: transparent;
+  -webkit-text-stroke: 2px #0f1011;
+}
+@media (min-width: 640px) {
+  .wordmark-outline {
+    -webkit-text-stroke: 3px #0f1011;
+  }
+}
+
+/* ── Marquee ───────────────────────────────────────────────── */
+@keyframes marquee-x {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(-50%);
+  }
+}
+.animate-marquee {
+  animation: marquee-x var(--marquee-duration, 32s) linear infinite;
+}
+.marquee-mask {
+  mask-image: linear-gradient(
+    to right,
+    transparent,
+    black 8%,
+    black 92%,
+    transparent
+  );
+}
+
+/* ── Cordón gigante (marquee Anton) ──────────────────────────
+   Las palabras del cordón del «Quién soy» en la fuente display
+   Anton ya integrada en el sitio (la del wordmark del hero):
+   mayúsculas enormes en bucle continuo. Al pasar el cursor por
+   encima de cada palabra, ésta se llena de lima, se inclina y
+   da un pequeño salto — el cordón entero respira. */
+.marquee-word {
+  display: inline-block;
+  font-family: "Anton", "Switzer", sans-serif;
+  font-size: clamp(2.25rem, 7.5vw, 5rem);
+  line-height: 1.06;
+  letter-spacing: 0.015em;
+  text-transform: uppercase;
+  white-space: nowrap;
+  color: var(--color-ink);
+  transform-origin: 50% 62%;
+  transition:
+    color 0.3s cubic-bezier(0.22, 1, 0.36, 1),
+    transform 0.3s cubic-bezier(0.22, 1, 0.36, 1);
+}
+.marquee-word:hover {
+  color: var(--color-lime-deep);
+  transform: skewX(-9deg) scale(1.05) translateY(-3px);
+}
+@media (prefers-reduced-motion: reduce) {
+  .marquee-word {
+    transition: none;
+  }
+}
+
+/* ── Pulse dot ─────────────────────────────────────────────── */
+@keyframes pulse-dot {
+  0%,
+  100% {
+    box-shadow: 0 0 0 0 rgba(200, 242, 78, 0.55);
+  }
+  70% {
+    box-shadow: 0 0 0 7px rgba(200, 242, 78, 0);
+  }
+}
+.live-dot {
+  animation: pulse-dot 2s ease-out infinite;
+}
+
+/* ── Grain / noise ─────────────────────────────────────────── */
+.noise::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  opacity: 0.5;
+  mix-blend-mode: overlay;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 220 220' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.34'/%3E%3C/svg%3E");
+}
+
+/* ── Progressive blur fade (footer / nav edges) ───────────── */
+.fade-blur-b {
+  mask-image: linear-gradient(to bottom, black 55%, transparent 100%);
+}
+
+/* ── Link underline sweep ──────────────────────────────────── */
+.link-sweep {
+  position: relative;
+}
+.link-sweep::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  bottom: -2px;
+  height: 1px;
+  width: 100%;
+  background: currentColor;
+  transform: scaleX(0);
+  transform-origin: right;
+  transition: transform 0.45s cubic-bezier(0.65, 0, 0.35, 1);
+}
+.link-sweep:hover::after {
+  transform: scaleX(1);
+  transform-origin: left;
+}
+
+/* ── Dotted separators (cosmos style) ─────────────────────── */
+.dot-sep {
+  background-image: radial-gradient(circle, #c9ccd1 1px, transparent 1.2px);
+  background-size: 2px 14px;
+  background-repeat: repeat-y;
+}
+
+/* ── Dropdown & mobile links ───────────────────────────────── */
+.dropdown-item {
+  display: block;
+  padding: 9px 14px;
+  border-radius: 12px;
+  font-size: 14px;
+  line-height: 1.35;
+  color: #5c5f63;
+  transition:
+    background-color 0.25s ease,
+    color 0.25s ease,
+    padding-left 0.25s ease;
+}
+.dropdown-item:hover {
+  background: #f3f4f6;
+  color: #0f1011;
+  padding-left: 18px;
+}
+.mobile-link {
+  padding: 12px 14px;
+  border-radius: 14px;
+  font-weight: 500;
+  transition: background-color 0.25s ease;
+}
+.mobile-link:hover {
+  background: #f3f4f6;
+}
+
+/* ── Footer links & chips ──────────────────────────────────── */
+.footer-link {
+  color: rgba(255, 255, 255, 0.55);
+  transition: color 0.25s ease, padding-left 0.25s ease;
+}
+.footer-link:hover {
+  color: #ffffff;
+  padding-left: 4px;
+}
+.social-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 7px 14px;
+  border-radius: 999px;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  color: rgba(255, 255, 255, 0.65);
+  font-size: 12.5px;
+  font-weight: 500;
+  transition:
+    border-color 0.25s ease,
+    color 0.25s ease,
+    transform 0.25s ease;
+}
+.social-chip:hover {
+  border-color: rgba(200, 242, 78, 0.5);
+  color: #ffffff;
+  transform: translateY(-1px);
+}
+
+/* ── Custom cursor for work cards ──────────────────────────── */
+@media (pointer: fine) {
+  .cursor-view {
+    cursor: none;
+  }
+}
+
+/* ── Footer: gradiente oscuro animado (aurora lima sobre negro) ── */
+.footer-aurora {
+  position: absolute; inset: 0;
+  overflow: hidden; pointer-events: none;
+}
+.footer-aurora::before,
+.footer-aurora::after {
+  content: ""; position: absolute; inset: -30%;
+  will-change: transform;
+}
+.footer-aurora::before {
+  background:
+    radial-gradient(38% 42% at 22% 16%, rgba(200, 242, 78, 0.13), transparent 68%),
+    radial-gradient(46% 52% at 84% 34%, rgba(139, 178, 91, 0.1), transparent 70%),
+    radial-gradient(56% 62% at 46% 100%, rgba(200, 242, 78, 0.09), transparent 72%);
+  animation: footer-aurora-a 16s ease-in-out infinite alternate;
+}
+.footer-aurora::after {
+  background:
+    radial-gradient(30% 36% at 70% 10%, rgba(94, 121, 66, 0.16), transparent 70%),
+    radial-gradient(42% 48% at 10% 82%, rgba(200, 242, 78, 0.06), transparent 70%);
+  animation: footer-aurora-b 23s ease-in-out infinite alternate;
+}
+@keyframes footer-aurora-a {
+  from { transform: translate3d(-2%, -1.5%, 0) scale(1); }
+  to { transform: translate3d(3%, 2%, 0) scale(1.14); }
+}
+@keyframes footer-aurora-b {
+  from { transform: translate3d(2.5%, 2%, 0) scale(1.1); }
+  to { transform: translate3d(-3%, -2%, 0) scale(1); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .footer-aurora::before,
+  .footer-aurora::after { animation: none; }
+}
+
+/* ── Honeycomb loader (pantalla de carga) ──────────────────── */
+/* Clásico "honeycomb" (css-loaders.com) — figuras negras #0f1011
+   sobre el fondo claro del sitio */
+@keyframes honeycomb {
+  0%,
+  20%,
+  80%,
+  100% {
+    opacity: 0;
+    transform: scale(0);
+  }
+
+  30%,
+  70% {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+.honeycomb {
+  height: 24px;
+  position: relative;
+  width: 24px;
+}
+.honeycomb div {
+  animation: honeycomb 2.1s infinite backwards;
+  background: #0f1011;
+  height: 12px;
+  margin-top: 6px;
+  position: absolute;
+  width: 24px;
+}
+.honeycomb div:after,
+.honeycomb div:before {
+  content: "";
+  border-left: 12px solid transparent;
+  border-right: 12px solid transparent;
+  position: absolute;
+  left: 0;
+  right: 0;
+}
+.honeycomb div:after {
+  top: -6px;
+  border-bottom: 6px solid #0f1011;
+}
+.honeycomb div:before {
+  bottom: -6px;
+  border-top: 6px solid #0f1011;
+}
+.honeycomb div:nth-child(1) {
+  /* delays negativos (fase −1s): el clúster nace ya en plena onda
+     — sin zona muerta inicial — y conserva el escalonado 0,1s */
+  animation-delay: -1s;
+  left: -28px;
+  top: 0;
+}
+.honeycomb div:nth-child(2) {
+  animation-delay: -0.9s;
+  left: -14px;
+  top: 22px;
+}
+.honeycomb div:nth-child(3) {
+  animation-delay: -0.8s;
+  left: 14px;
+  top: 22px;
+}
+.honeycomb div:nth-child(4) {
+  animation-delay: -0.7s;
+  left: 28px;
+  top: 0;
+}
+.honeycomb div:nth-child(5) {
+  animation-delay: -0.6s;
+  left: 14px;
+  top: -22px;
+}
+.honeycomb div:nth-child(6) {
+  animation-delay: -0.5s;
+  left: -14px;
+  top: -22px;
+}
+.honeycomb div:nth-child(7) {
+  animation-delay: -0.4s;
+  left: 0;
+  top: 0;
+}
+/* Variante grande del honeycomb (pantalla de carga): el clúster se
+   escala alrededor de su centro sin tocar las métricas clásicas */
+.honeycomb-lg {
+  scale: 1.55;
+}
+
+/* ── Condiciones comerciales (FlowingMenu) — «vestido CHARLI» ──
+   El componente React Bits va verbatim (ui/flowing-menu.tsx/.css);
+   aquí sólo el vestido de marca sobre la instancia de pricing.tsx
+   (wrapper .cond-flow): etiquetas de fila y texto de banda en Anton
+   mayúsculas — la única voz display del sitio (cinta, hero) — con el
+   CANDADO DOBLE de tamaño en la etiqueta: font-size
+   clamp(16px, min(38cqh, 8cqw), 132px) — manda el alto de fila
+   (diseño original) pero nunca supera el 8 % del ancho de la
+   franja → «PROYECTOS COMPLEJOS» cabe íntegra incluso a 320 px.
+   Índice/meta en caps con tracking abierto; fotos de la banda
+   graduadas (mismos valores del set viejo de TiltedCard). En móvil
+   (≤639px) meta y flecha se ocultan. */
+.cond-flow .flowing-menu__label {
+  font-family: "Anton", "Switzer", sans-serif;
+  font-weight: 400;
+  font-size: clamp(16px, min(38cqh, 8cqw), 132px);
+  letter-spacing: 0.015em;
+  text-transform: uppercase;
+}
+.cond-flow .flowing-menu__index,
+.cond-flow .flowing-menu__meta {
+  text-transform: uppercase;
+  letter-spacing: 0.14em;
+}
+.cond-flow .flowing-menu__part-text {
+  font-family: "Anton", "Switzer", sans-serif;
+  font-weight: 400;
+  text-transform: uppercase;
+}
+.cond-flow .flowing-menu__image {
+  filter: saturate(0.72) sepia(0.08);
+}
+@media (max-width: 639px) {
+  .cond-flow .flowing-menu__meta,
+  .cond-flow .flowing-menu__arrow {
+    display: none;
+  }
+}
+
+/* ── .fm-wrap (features de tarifas) ──────────────────────────
+   El SpecialText envuelve cada feature en un span con
+   whitespace: pre — en ~320px las líneas largas medían min-content
+   339px y empujaban scroll horizontal. pre-wrap permite envolver
+   conservando los saltos explícitos. */
+.fm-wrap {
+  white-space: pre-wrap;
+}
+
+/* ── Reduced motion ────────────────────────────────────────── */
+@media (prefers-reduced-motion: reduce) {
+  .animate-marquee {
+    animation: none;
+  }
+  /* el honeycomb del loader se mantiene animado siempre: es una
+     pantalla breve (<3s) y el usuario pidió conservar su animación */
+}
+
+/* cache-bust */

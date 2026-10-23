@@ -1,0 +1,161 @@
+/* ────────────────────────────────────────────────────────────────
+   HoverImg — puerto del bloque «hover-img» de Obsidian UI
+   (https://www.obsidianui.dev/r/hover-img.json — registro shadcn:
+   npx shadcn@latest add "https://www.obsidianui.dev/r/hover-img.json").
+   Adaptado a la identidad del sitio: fondo transparente (vive sobre
+   bg-paper-dim), tinta y bordes del sistema, tipografía Switzer.
+   Comportamiento original conservado: miniatura fija que sigue al
+   cursor (GSAP quickTo), pila de imágenes conmutable por índice,
+   escala 0 al salir de la lista, filas que se atenúan mientras el
+   título y la etiqueta se separan.
+   EXTENSIONES propias: cada fila puede llevar una ACCIÓN a la
+   derecha (p. ej. el botón «+» de detalles); la miniatura se
+   desvanece a medida que el cursor se acerca a la acción, y no
+   aparece mientras la fila está abierta (is-open).
+   ──────────────────────────────────────────────────────────────── */
+
+.hover-img-container {
+  --hi-text: #0f1011;
+  --hi-text-muted: #5c5f63;
+  --hi-border: rgba(15, 16, 17, 0.12);
+  width: 100%;
+  background: transparent;
+  color: var(--hi-text);
+  position: relative;
+}
+
+.hover-img-projects {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+}
+
+/* Fila: bloque (la cabeza flexible + el extra expandible debajo) */
+.hover-img-project {
+  width: 100%;
+  padding: 1.35rem 0.25rem 1.35rem clamp(0.25rem, 2vw, 1.5rem);
+  border-top: 1px solid var(--hi-border);
+  cursor: pointer;
+}
+.hover-img-project:last-child {
+  border-bottom: 1px solid var(--hi-border);
+}
+
+/* Cabeza: título a la izquierda, etiqueta a la derecha, acción al final */
+.hover-img-row {
+  display: flex;
+  align-items: center;
+  gap: clamp(0.9rem, 2.5vw, 2rem);
+}
+.hover-img-head {
+  flex: 1 1 auto;
+  min-width: 0;
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 1.25rem;
+  transition: opacity 0.5s ease;
+}
+.hover-img-project h2 {
+  font-size: clamp(1.5rem, 3.4vw, 2.6rem);
+  font-weight: 500;
+  letter-spacing: -0.025em;
+  line-height: 1.08;
+  margin: 0;
+  transition: transform 0.5s ease;
+}
+.hover-img-project p {
+  font-size: 0.95rem;
+  font-weight: 400;
+  color: var(--hi-text-muted);
+  margin: 0;
+  text-align: right;
+  transition: transform 0.5s ease;
+}
+
+/* Firma Obsidian: al pasar el cursor la fila se atenúa y el título y
+   la etiqueta se separan; las filas ABIERTAS no se atenúan (se leen
+   sus detalles) y la acción «+» queda siempre a plena opacidad. */
+.hover-img-project:not(.is-open):hover .hover-img-head {
+  opacity: 0.5;
+}
+.hover-img-project:not(.is-open):hover h2 {
+  transform: translateX(-15px);
+}
+.hover-img-project:not(.is-open):hover p {
+  transform: translateX(15px);
+}
+
+/* Acción («+»): fuera del flujo de la atenuación */
+.hover-img-action {
+  flex: 0 0 auto;
+  display: flex;
+}
+
+/* Contenido extra (detalles expandibles) al pie de la fila */
+.hover-img-extra {
+  width: 100%;
+}
+
+/* Miniatura fija que sigue al cursor */
+.hover-img-thumbnail-wrapper {
+  position: fixed;
+  width: 400px;
+  height: 250px;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  pointer-events: none;
+  top: 0;
+  left: 0;
+  transform-origin: center center;
+  z-index: 60;
+  border-radius: 14px;
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.3);
+  border: 1px solid rgba(15, 16, 17, 0.08);
+}
+
+.hover-img-thumbnail {
+  width: 100%;
+  height: 100%;
+  flex-shrink: 0;
+}
+.hover-img-thumbnail img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+/* Responsive: en táctil no hay cursor — sin miniatura, filas compactas */
+@media (max-width: 768px) {
+  .hover-img-thumbnail-wrapper {
+    display: none;
+  }
+  .hover-img-project {
+    padding: 1.15rem 0.25rem;
+  }
+  .hover-img-project h2 {
+    font-size: 1.45rem;
+  }
+  .hover-img-project p {
+    font-size: 0.85rem;
+  }
+  .hover-img-head {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.35rem;
+  }
+  .hover-img-project p {
+    text-align: left;
+  }
+}
+
+/* Variante compacta del registro (no usada por el sitio, se mantiene
+   por fidelidad al componente) */
+.hover-img-compact {
+  min-height: auto;
+  padding: 0;
+}
+.hover-img-compact .hover-img-project {
+  padding: 0.75rem 1rem;
+}
