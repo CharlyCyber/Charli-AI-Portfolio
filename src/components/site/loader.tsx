@@ -9,21 +9,23 @@ const LOAD_DURATION = 2600; // ms
 
 type Phase = "loading" | "exit" | "gone";
 
-/* Pantalla de carga 100 % visual: CERO nodos de texto (sin fila
-   superior, sin contador 0→100 %, sin «Cargando portfolio», sin
-   sr-only, sin esquinas — petición expresa del usuario). Queda el
-   honeycomb + la barra de progreso, y la transición de salida de
-   la ventana que sube (exit y: -100 %). */
+/* Pantalla de carga: honeycomb + barra + CONTADOR 0 % → 100 %
+   (petición expresa del usuario: cronómetro visible sencillo, sin
+   frases ni decoración extra). El total ≤ 5 s se garantiza por
+   construcción: LOAD_DURATION (2,6 s) + 320 ms de gracia + cortina
+   de 1 s que puede solaparse — la pantalla nunca espera a la red. */
 export function Loader() {
   // re-render when store flips (navbar/hero listen to the same store)
   useLoaderState();
   const [phase, setPhase] = useState<Phase>("loading");
-  /* ref directo al relleno de la barra: se actualiza por DOM
-     (style.width) sin pasar por React — el hilo principal llega
-     saturado durante la carga inicial (hidratación, WebGL, fuentes)
-     y un re-render por fotograma se pierde. Sin texto que pintar,
-     ya no hace falta pctRef: sólo el relleno de la barra. */
+  /* refs directos al relleno de la barra y al número: se actualizan
+     por DOM (style.width / textContent) sin pasar por React — el
+     hilo principal llega saturado durante la carga inicial
+     (hidratación, WebGL, fuentes) y un re-render por fotograma se
+     pierde. */
   const fillRef = useRef<HTMLDivElement>(null);
+  const progressRef = useRef<HTMLDivElement>(null);
+  const pctRef = useRef<HTMLSpanElement>(null);
 
   useEffect(() => {
     if (sessionStorage.getItem("charli-loader-done") === "1") {
@@ -38,6 +40,10 @@ export function Loader() {
     const start = performance.now();
     const paint = (n: number) => {
       if (fillRef.current) fillRef.current.style.width = `${n}%`;
+      if (progressRef.current) {
+        progressRef.current.setAttribute("aria-valuenow", String(n));
+      }
+      if (pctRef.current) pctRef.current.textContent = `${n}%`;
     };
     let iv = 0;
     const finish = setTimeout(() => {
@@ -80,8 +86,7 @@ export function Loader() {
           }}
         >
           {/* honeycomb grande + progreso 0→100 — figuras negras sobre
-              el fondo claro del sitio, todo centrado. CERO texto: la
-              barra es la única lectura del progreso (por ref). */}
+              el fondo claro del sitio, todo centrado. */}
           <div
             className="absolute inset-0 flex flex-col items-center justify-center gap-8"
             role="status"
@@ -102,13 +107,32 @@ export function Loader() {
             </div>
 
             {/* progreso de carga 0 % → 100 % — actualizado por ref
-                (ver arriba): arranca vacía y asciende sin re-renders */}
-            <div className="h-[3px] w-48 overflow-hidden rounded-full bg-ink/10 sm:w-56">
-              <div
-                ref={fillRef}
-                className="h-full rounded-full bg-ink transition-[width] duration-150 ease-linear"
-                style={{ width: "0%" }}
-              />
+                (ver arriba): arranca vacía y asciende sin re-renders.
+                Debajo, el cronómetro 0 % → 100 % con aria-live para
+                lectores de pantalla. */}
+            <div
+              ref={progressRef}
+              className="flex w-48 flex-col items-center gap-3 sm:w-56"
+              role="progressbar"
+              aria-valuemin={0}
+              aria-valuemax={100}
+              aria-valuenow={0}
+              aria-label="Progreso de carga"
+            >
+              <div className="h-[3px] w-full overflow-hidden rounded-full bg-ink/10">
+                <div
+                  ref={fillRef}
+                  className="h-full rounded-full bg-ink transition-[width] duration-150 ease-linear"
+                  style={{ width: "0%" }}
+                />
+              </div>
+              <span
+                ref={pctRef}
+                aria-live="polite"
+                className="font-num text-[15px] font-semibold tabular-nums tracking-wide text-ink"
+              >
+                0%
+              </span>
             </div>
           </div>
         </motion.div>

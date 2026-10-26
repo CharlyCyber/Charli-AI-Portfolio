@@ -417,7 +417,7 @@ function StickyWorks({ works }: { works: typeof WORKS }) {
 export function Works() {
   return (
     <section id="proyectos" className="py-20 sm:py-28">
-      <div className="mx-auto max-w-[1320px] px-4 sm:px-6">
+      <div className="relative z-40 mx-auto max-w-[1320px] bg-paper px-4 sm:px-6">
         <Reveal>
           <p className="label-caps">
             <SpecialText inView>

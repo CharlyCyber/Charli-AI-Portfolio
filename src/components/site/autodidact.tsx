@@ -130,8 +130,12 @@ export function Autodidact() {
   const { sectionRef, zoneRef, calibration } = useCardCalibration();
 
   return (
-    <section id="sobre-mi" ref={sectionRef} className="relative py-20 sm:py-28">
-      <div className="mx-auto max-w-[1320px] px-4 sm:px-6">
+    <section
+      id="sobre-mi"
+      ref={sectionRef}
+      className="relative isolate py-20 sm:py-28"
+    >
+      <div className="relative z-10 mx-auto max-w-[1320px] px-4 sm:px-6">
         <Reveal>
           <p className="label-caps">
             <SpecialText inView>Sobre mí</SpecialText>
@@ -294,7 +298,7 @@ export function Autodidact() {
           del wordmark del hero): mayúsculas enormes que se llenan de
           lima, se inclinan y saltan al pasar el cursor por encima de
           cada palabra. Asteriscos lima como separadores. */}
-      <div className="marquee-mask mt-16 overflow-hidden border-y border-black/[0.07] bg-white py-4 sm:py-5">
+      <div className="marquee-mask relative z-10 mt-16 overflow-hidden border-y border-black/[0.07] bg-white py-4 sm:py-5">
         <div className="animate-marquee flex w-max items-center gap-x-8 pr-8 sm:gap-x-12 sm:pr-12 [--marquee-duration:34s]">
           {[...MARQUEE_ITEMS, ...MARQUEE_ITEMS].map((item, i) => (
             <span key={i} className="flex items-center gap-x-8 sm:gap-x-12">
@@ -311,13 +315,20 @@ export function Autodidact() {
 
       {/* Overlay full-section con la tarjeta elástica: cubre TODA la
           sección (mucho más que la zona de reposo) para que la tarjeta
-          pueda estirarse por encima de letras, chips y chat. El Lanyard
+          pueda estirarse por encima de letras, chips y chat. En móvil
+          (hasta lg) la tarjeta viaja POR DETRÁS del contenido
+          (z-0 + contenido en z-10): el texto queda siempre legible y
+          la tarjeta asoma alrededor; en escritorio (lg:z-30) vuelve a
+          quedar por encima como siempre. El Lanyard
           escucha en window y hace hit-testing contra la tarjeta, así que
           el overlay es transparente al puntero y el contenido de abajo
           sigue siendo interactivo. La tarjeta reposa calibrada sobre la
           zona de la derecha (ancla "photo", factor 0.77) con balanceo
           de brisa; un clic la gira (foto ↔ logo). */}
-      <div className="pointer-events-none absolute inset-0 z-30" aria-hidden="true">
+      <div
+        className="pointer-events-none absolute inset-0 z-0 overflow-hidden lg:z-30"
+        aria-hidden="true"
+      >
         {calibration && (
           <Lanyard
             frontImage="/images/charli-perfil.jpg"

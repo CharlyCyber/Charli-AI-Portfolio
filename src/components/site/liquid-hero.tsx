@@ -967,6 +967,10 @@ export function LiquidHero() {
   const [touched, setTouched] = useState(false);
   const [tiltOn, setTiltOn] = useState(false);
   const [isTouch, setIsTouch] = useState(false);
+  /* En táctil la píldora «Activar movimiento» está disponible desde
+     el principio (ya no hay que tocar primero): vive en la posición
+     fijada del antiguo botón «Descargar código» (abajo a la derecha).
+     Hasta que el loader termina, la cortina la tapa igualmente. */
   const [showPill, setShowPill] = useState(false);
 
   /* el bucle del titular arranca al levantarse la cortina del loader */
@@ -1012,6 +1016,7 @@ export function LiquidHero() {
     const syncTouch = () => {
       setIsTouch(touchQuery.matches);
       if (!touchQuery.matches) setShowPill(false);
+      else if (!tiltOnRef.current) setShowPill(true);
     };
     /* sin setState síncrono dentro del efecto */
     const touchRaf = requestAnimationFrame(syncTouch);
@@ -1222,8 +1227,9 @@ export function LiquidHero() {
         </div>
       </div>
 
-      {/* pill para activar el movimiento por inclinación (solo táctil) */}
-      {showPill && !tiltOn && (
+      {/* pill para activar el movimiento por inclinación (solo táctil,
+          tras levantarse la cortina del loader) */}
+      {loaderDone && showPill && !tiltOn && (
         <button
           type="button"
           className="sh-tilt-pill"

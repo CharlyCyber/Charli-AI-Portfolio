@@ -14,7 +14,7 @@ export function CTA() {
           <div className="noise relative overflow-hidden rounded-[28px] bg-[#0a0a0b] px-6 py-20 text-center text-white sm:rounded-[36px] sm:py-32">
             {/* motion graphics bg */}
             <video
-              src="/videos/mixkit-47282.mp4"
+              src="/videos/mixkit-44818.mp4"
               className="absolute inset-0 h-full w-full object-cover opacity-30"
               autoPlay
               muted

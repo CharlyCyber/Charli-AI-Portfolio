@@ -233,6 +233,10 @@
   from { opacity: 0; transform: translateX(-50%) translateY(12px); }
   to { opacity: 1; transform: translateX(-50%) translateY(0); }
 }
+@keyframes sh-pill-in-r {
+  from { opacity: 0; transform: translateY(12px); }
+  to { opacity: 1; transform: translateY(0); }
+}
 @container (max-width: 1023px) {
   .sh-content { grid-template-columns: 1fr; gap: 28px; }
   .sh-aside { justify-self: start; max-width: 520px; padding-bottom: 0; }
@@ -247,8 +251,8 @@
   /* Hero móvil: el contenido pasa a columna que llena todo el alto
      (el spacer colapsa) y reparte espacio — letras del hero
      ARRIBA-IZQUIERDA bajo el navbar (~70px → padding-top 88px),
-     aside abajo. padding-bottom 78px para que los CTAs no queden
-     bajo el botón flotante «Descargar código». */
+     aside abajo. El botón de movimiento ocupa la antigua posición
+     de la utilidad flotante que fue retirada. */
   .sh-content {
     flex: 1 1 auto;
     display: flex;
@@ -261,7 +265,16 @@
   .sh-head { flex: 0 0 auto; }
   .sh-spacer { flex: 0; }
   .sh-credit { right: auto; left: 50%; transform: translateX(-50%); }
-  .sh-tilt-pill { bottom: 96px; }
+  /* Móvil: fuera el crédito «motion según …» (molestaba en móvil) y
+     la píldora «Activar movimiento» pasa a la posición del antiguo
+     botón flotante «Descargar código»: abajo a la derecha. */
+  .sh-credit { display: none; }
+  .sh-tilt-pill {
+    left: auto; right: 16px; bottom: 16px; transform: none;
+    padding: 12px 20px;
+    animation: sh-pill-in-r 0.5s cubic-bezier(0.2, 0.7, 0.2, 1);
+  }
+  .sh-tilt-pill:hover { transform: translateY(-2px); }
 }
 @media (prefers-reduced-motion: reduce) {
   .sh-hint::before { animation: none; }

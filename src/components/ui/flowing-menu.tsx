@@ -175,7 +175,9 @@ function FlowingMenu({
     onItemClick
   };
   const settingsRef = useRef(settings);
-  settingsRef.current = settings;
+  useIsoLayoutEffect(() => {
+    settingsRef.current = settings;
+  });
 
   const marqueeAt = (index: number) => {
     if (!marquees.current[index]) marquees.current[index] = { x: 0, part: 0, spin: 0, covered: false };
@@ -485,7 +487,9 @@ function FlowingMenu({
     kick();
   };
   const measureRef = useRef(measure);
-  measureRef.current = measure;
+  useIsoLayoutEffect(() => {
+    measureRef.current = measure;
+  });
 
   useIsoLayoutEffect(() => {
     measureRef.current();
@@ -507,9 +511,11 @@ function FlowingMenu({
   });
 
   const goToRef = useRef(goTo);
-  goToRef.current = goTo;
   const releaseRef = useRef(release);
-  releaseRef.current = release;
+  useIsoLayoutEffect(() => {
+    goToRef.current = goTo;
+    releaseRef.current = release;
+  });
 
   useIsoLayoutEffect(() => {
     if (!intro || prefersReduced()) return undefined;

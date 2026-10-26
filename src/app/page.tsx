@@ -12,7 +12,6 @@ import { Pricing } from "@/components/site/pricing";
 import { CTA } from "@/components/site/cta";
 import { Footer } from "@/components/site/footer";
 import { CookieBanner } from "@/components/site/cookie-banner";
-import { DownloadCode } from "@/components/site/download-code";
 
 export default function Home() {
   return (
@@ -40,7 +39,6 @@ export default function Home() {
         <Footer />
       </div>
       <CookieBanner />
-      <DownloadCode />
     </SmoothScroll>
   );
 }
