@@ -53,11 +53,31 @@ export function LazyVideo({
 
   useEffect(() => {
     if (!shouldLoad) return;
-    ref.current?.play().catch(() => {
-      // Algunos navegadores solo permiten iniciar el loop cuando el vídeo
-      // alcanza estado reproducible; `autoPlay` hará el siguiente intento.
-    });
-  }, [shouldLoad]);
+    const video = ref.current;
+    if (!video) return;
+
+    // En móviles, declarar muted + playsInline en el elemento y llamar a
+    // load() antes de play() mejora la compatibilidad con autoplay.
+    video.muted = props.muted ?? false;
+    video.playsInline = true;
+    video.load();
+
+    let cancelled = false;
+    const tryPlay = () => {
+      if (cancelled || video.paused === false) return;
+      video.play().catch(() => {
+        // El navegador puede bloquear autoplay por ahorro de datos/energía.
+        // El poster permanece visible como fallback.
+      });
+    };
+    video.addEventListener("canplay", tryPlay);
+    tryPlay();
+
+    return () => {
+      cancelled = true;
+      video.removeEventListener("canplay", tryPlay);
+    };
+  }, [shouldLoad, props.muted]);
 
   return (
     <video
