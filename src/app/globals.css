@@ -250,6 +250,9 @@
   .sh-h1 { font-size: clamp(40px, min(9.5cqw, 9cqh), 96px); }
 }
 @container (max-width: 639px) {
+  /* El hint «Toca la forma» se reserva para escritorio; en móvil
+     distrae del hero y no aporta interacción necesaria. */
+  .sh-hint { display: none !important; }
   .sh-h1 { font-size: clamp(34px, min(11.5cqw, 7.2cqh), 60px); line-height: 0.94; }
   .sh-body { font-size: 15px; margin-bottom: 20px; }
   .sh-eyebrow { font-size: 11px; }
