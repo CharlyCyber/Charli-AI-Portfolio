@@ -28,6 +28,7 @@ import {
 } from "lucide-react";
 import { MaskLines, Reveal } from "./anim";
 import { SpecialText } from "@/components/ui/special-text";
+import { LazyVideo } from "@/components/ui/lazy-video";
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -497,16 +498,22 @@ function MotionCard({
         {/* vídeo grande horizontal: 16/9 nativo (works-ticker es
             1600×900) → sin recortes, a todo el ancho del contenedor */}
         <div className="relative aspect-[16/9] w-full overflow-hidden rounded-2xl bg-[#0a0a0b] sm:rounded-[28px]">
-          <motion.video
-            src={src}
-            className="h-full w-full object-cover"
-            autoPlay
-            muted
-            loop
-            playsInline
+          <motion.div
+            className="h-full w-full"
             variants={{ rest: { scale: 1 }, hover: { scale: 1.03 } }}
             transition={{ duration: 0.9, ease: [0.22, 1, 0.36, 1] }}
-          />
+          >
+            <LazyVideo
+              src={src}
+              poster="/images/work-portfolio.jpg"
+              className="h-full w-full object-cover"
+              autoPlay
+              muted
+              loop
+              playsInline
+              aria-hidden
+            />
+          </motion.div>
 
           {/* gradient scrim */}
           <div className="absolute inset-0 bg-gradient-to-t from-black/55 via-transparent to-transparent opacity-80 transition-opacity duration-500 group-hover:opacity-95" />

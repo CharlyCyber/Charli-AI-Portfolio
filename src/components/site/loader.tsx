@@ -5,14 +5,14 @@ import { useEffect, useRef, useState } from "react";
 import { loaderStore, useLoaderState } from "./loader-store";
 import { EASE } from "./anim";
 
-const LOAD_DURATION = 2600; // ms
+const LOAD_DURATION = 1500; // ms
 
 type Phase = "loading" | "exit" | "gone";
 
 /* Pantalla de carga: honeycomb + barra + CONTADOR 0 % → 100 %
    (petición expresa del usuario: cronómetro visible sencillo, sin
    frases ni decoración extra). El total ≤ 5 s se garantiza por
-   construcción: LOAD_DURATION (2,6 s) + 320 ms de gracia + cortina
+   construcción: LOAD_DURATION (1,5 s) + 120 ms de gracia + cortina
    de 1 s que puede solaparse — la pantalla nunca espera a la red. */
 export function Loader() {
   // re-render when store flips (navbar/hero listen to the same store)
@@ -45,17 +45,17 @@ export function Loader() {
       }
       if (pctRef.current) pctRef.current.textContent = `${n}%`;
     };
-    let iv = 0;
+    let iv: ReturnType<typeof setInterval> | null = null;
     const finish = setTimeout(() => {
       // begin curtain exit + release the rest of the page
-      clearInterval(iv);
+      if (iv !== null) clearInterval(iv);
       paint(100);
       setPhase("exit");
       loaderStore.set({ done: true, progress: 100 });
       sessionStorage.setItem("charli-loader-done", "1");
       // deterministic unmount once the 1s curtain has finished
       setTimeout(() => setPhase("gone"), 1080);
-    }, LOAD_DURATION + 320);
+    }, LOAD_DURATION + 120);
     /* interval (y no requestAnimationFrame): los timers siguen
        disparándose aunque el navegador pause o acelere el bucle de
        render (pestaña en segundo plano, preview embebida, hilo
@@ -67,7 +67,7 @@ export function Loader() {
       paint(Math.round(eased * 100));
     }, 50);
     return () => {
-      clearInterval(iv);
+      if (iv !== null) clearInterval(iv);
       clearTimeout(finish);
     };
   }, []);

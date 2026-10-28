@@ -4,6 +4,7 @@ import { useRef } from "react";
 import { motion, useScroll, useTransform } from "framer-motion";
 import { Counter, MaskLines, Reveal } from "./anim";
 import { SpecialText } from "@/components/ui/special-text";
+import { LazyVideo } from "@/components/ui/lazy-video";
 
 const STATS = [
   { to: 2, suffix: "+", label: "años de experiencia con herramientas de IA" },
@@ -28,8 +29,9 @@ export function DarkStatement() {
     >
       {/* motion graphics bg */}
       <motion.div style={{ y: videoY }} className="absolute inset-[-14%]">
-        <video
+        <LazyVideo
           src="/videos/mixkit-44818.mp4"
+          poster="/images/hero-bg-poster.jpg"
           className="h-full w-full object-cover opacity-40"
           autoPlay
           muted

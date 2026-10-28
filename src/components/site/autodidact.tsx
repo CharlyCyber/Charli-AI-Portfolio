@@ -1,11 +1,14 @@
 "use client";
 
+import dynamic from "next/dynamic";
 import { useEffect, useRef, useState } from "react";
 import { motion } from "framer-motion";
 import { Asterisk, Code2, Cpu, MessageCircle, Terminal } from "lucide-react";
 import { MaskLines, Reveal } from "./anim";
 import { SpecialText } from "@/components/ui/special-text";
-import Lanyard from "@/components/ui/lanyard";
+const Lanyard = dynamic(() => import("@/components/ui/lanyard"), {
+  ssr: false,
+});
 
 const CHAT = [
   { from: "client", text: "¡Hola! Necesito una landing para mi negocio, con animaciones y formularios." },
@@ -61,6 +64,23 @@ function useCardCalibration() {
   const sectionRef = useRef<HTMLElement | null>(null);
   const zoneRef = useRef<HTMLDivElement | null>(null);
   const [calibration, setCalibration] = useState<CardCalibration | null>(null);
+  const [shouldLoadLanyard, setShouldLoadLanyard] = useState(false);
+
+  useEffect(() => {
+    const section = sectionRef.current;
+    if (!section) return;
+
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (!entry.isIntersecting) return;
+        setShouldLoadLanyard(true);
+        observer.disconnect();
+      },
+      { rootMargin: "500px 0px" }
+    );
+    observer.observe(section);
+    return () => observer.disconnect();
+  }, []);
 
   useEffect(() => {
     const section = sectionRef.current;
@@ -123,11 +143,12 @@ function useCardCalibration() {
     };
   }, []);
 
-  return { sectionRef, zoneRef, calibration };
+  return { sectionRef, zoneRef, calibration, shouldLoadLanyard };
 }
 
 export function Autodidact() {
-  const { sectionRef, zoneRef, calibration } = useCardCalibration();
+  const { sectionRef, zoneRef, calibration, shouldLoadLanyard } = useCardCalibration();
+  const [lanyardReady, setLanyardReady] = useState(false);
 
   return (
     <section
@@ -205,7 +226,17 @@ export function Autodidact() {
               sustituida por la propia tarjeta 3D (frontal = foto, reverso =
               logo), que cuelga del overlay full-section y reposa aquí —
               sobre esta zona, sin tapar el texto de la izquierda. */}
-          <div ref={zoneRef} className="pointer-events-none aspect-[4/4.4]" aria-hidden="true" />
+          <div ref={zoneRef} className="pointer-events-none relative aspect-[4/4.4]" aria-hidden="true">
+            {!lanyardReady && (
+              <div className="absolute inset-0 grid place-items-center">
+                <img
+                  src="/images/charli-perfil.jpg"
+                  alt=""
+                  className="h-auto w-[min(72vw,320px)] rounded-[1.45rem] border border-black/10 object-cover shadow-[0_24px_64px_-30px_rgba(15,16,17,0.55)]"
+                />
+              </div>
+            )}
+          </div>
         </div>
 
         {/* Real-time chat mockup */}
@@ -329,7 +360,7 @@ export function Autodidact() {
         className="pointer-events-none absolute inset-0 z-0 overflow-hidden lg:z-30"
         aria-hidden="true"
       >
-        {calibration && (
+        {shouldLoadLanyard && calibration && (
           <Lanyard
             frontImage="/images/charli-perfil.jpg"
             backImage="/images/logo-card.webp"
@@ -342,6 +373,7 @@ export function Autodidact() {
             size={calibration.size}
             strapLength={calibration.strapLength}
             anchor={calibration.anchor}
+            onReady={() => setLanyardReady(true)}
           />
         )}
       </div>

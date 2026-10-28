@@ -132,6 +132,12 @@
   user-select: none; -webkit-user-drag: none;
   transition: opacity 0.5s ease; opacity: 0;
 }
+/* Fix-CLS: el fallback (y el hint) se quedan invisibles hasta que
+   layout() les asigna su caja final (data-sized / data-positioned).
+   Un elemento con opacity:0 no cuenta en CLS, y evitamos que se pinte
+   en su caja por defecto (rincón superior izquierdo, tamaño natural)
+   para después recolocarlo — ese salto medía 0.36. */
+.sh-root[data-gl="off"] .sh-fallback[data-sized="1"] { opacity: 1; }
 .sh-root[data-gl="on"] .sh-canvas { opacity: 1; }
 .sh-root[data-gl="on"] .sh-fallback { opacity: 0; }
 .sh-backdrop {
@@ -148,8 +154,9 @@
   transform: translate(-50%, 0);
   display: flex; align-items: center; gap: 10px; white-space: nowrap;
   font-size: 11px; letter-spacing: 0.14em; text-transform: uppercase;
-  opacity: 0.5; pointer-events: none; transition: opacity 0.8s ease;
+  opacity: 0; pointer-events: none; transition: opacity 0.8s ease;
 }
+.sh-hint[data-positioned="1"] { opacity: 0.5; }
 .sh-hint::before {
   content: ""; width: 6px; height: 6px; border-radius: 50%;
   background: currentColor; animation: sh-pulse 2.4s ease-in-out infinite;

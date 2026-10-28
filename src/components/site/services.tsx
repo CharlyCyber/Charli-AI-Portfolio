@@ -6,6 +6,7 @@ import { ArrowUpRight, Plus } from "lucide-react";
 import { MaskLines, Reveal, EASE_OUT } from "./anim";
 import { SpecialText } from "@/components/ui/special-text";
 import { HoverImg, type HoverImgItem } from "@/components/block/hover-img";
+import { LazyVideo } from "@/components/ui/lazy-video";
 
 /* ── Servicios (info íntegra, en español) ─────────────────────
    La lista se presenta bajo el estilo Obsidian UI «hover-img»
@@ -92,8 +93,9 @@ export function Services() {
             Sustituye a la aurora: misma energía que el resto del sitio. */}
         <Reveal delay={0.2} className="mt-10">
           <div className="group relative aspect-[16/9] w-full overflow-hidden rounded-[28px] bg-[#0a0a0b] sm:aspect-[21/6]">
-            <video
+            <LazyVideo
               src="/videos/mixkit-4192-screens.mp4"
+              poster="/images/svc-web.jpg"
               className="h-full w-full object-cover transition-transform duration-[1200ms] ease-out group-hover:scale-[1.03]"
               autoPlay
               muted

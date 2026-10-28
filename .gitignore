@@ -37,6 +37,10 @@ server.log
 # vercel
 .vercel
 
+# freebuff local state & debug captures
+/.freebuff/
+screenshots/
+
 # typescript
 *.tsbuildinfo
 next-env.d.ts

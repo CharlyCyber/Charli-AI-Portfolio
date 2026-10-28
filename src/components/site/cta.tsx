@@ -4,6 +4,7 @@ import { ArrowUpRight, Mail } from "lucide-react";
 import { FlipGroup, flipWords } from "@/components/ui/flip-links";
 import { MaskLines, Reveal, Magnetic } from "./anim";
 import { SpecialText } from "@/components/ui/special-text";
+import { LazyVideo } from "@/components/ui/lazy-video";
 
 export function CTA() {
 
@@ -13,8 +14,9 @@ export function CTA() {
         <Reveal y={60}>
           <div className="noise relative overflow-hidden rounded-[28px] bg-[#0a0a0b] px-6 py-20 text-center text-white sm:rounded-[36px] sm:py-32">
             {/* motion graphics bg */}
-            <video
+            <LazyVideo
               src="/videos/mixkit-44818.mp4"
+              poster="/images/hero-bg-poster.jpg"
               className="absolute inset-0 h-full w-full object-cover opacity-30"
               autoPlay
               muted

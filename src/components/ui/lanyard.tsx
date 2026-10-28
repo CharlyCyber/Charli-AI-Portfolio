@@ -41,6 +41,8 @@ export interface LanyardProps {
   breeze?: number;
   interactive?: boolean;
   intro?: boolean;
+  /** Confirma que la primera textura de la tarjeta ya se pintó. */
+  onReady?: () => void;
   className?: string;
   style?: CSSProperties;
 }
@@ -894,6 +896,7 @@ const Lanyard = ({
   breeze = 0.5,
   interactive = true,
   intro = true,
+  onReady,
   className = '',
   style
 }: LanyardProps) => {
@@ -1065,8 +1068,6 @@ const Lanyard = ({
         frontCanvas.height = height;
         backCanvas.width = width;
         backCanvas.height = height;
-        frontTexture.dispose();
-        backTexture.dispose();
       }
       paintFace(frontCanvas, images.front, color, s.imageFit);
       paintFace(backCanvas, images.back || images.front, color, s.imageFit);
@@ -1079,7 +1080,6 @@ const Lanyard = ({
       const s = settingsRef.current!;
       tileRatio = paintStrap(strapCanvas, images.strap, parseColor(s.strapColor, [0.07, 0.07, 0.07]));
       weave.repeat.set(2, 2 * tileRatio);
-      strapTexture.dispose();
       strapTexture.needsUpdate = true;
       start();
     };
@@ -1156,6 +1156,8 @@ const Lanyard = ({
           images.strap = strap;
           paintFaces();
           repaintStrap();
+          render();
+          onReady?.();
         });
       }
       const faceKey = `${layoutKey}|${s.cardColor}|${s.imageFit}`;
@@ -1449,7 +1451,8 @@ const Lanyard = ({
     const resize = () => {
       view.width = Math.max(1, container.clientWidth);
       view.height = Math.max(1, container.clientHeight);
-      renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
+      const cap = window.matchMedia('(pointer: coarse)').matches ? 1.25 : 1.75;
+      renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, cap));
       renderer.setSize(view.width, view.height, false);
       apply();
       render();

@@ -56,7 +56,7 @@ import React, { useRef, useEffect } from "react";
 import { gsap } from "gsap";
 
 interface LoopingWordsProps {
-  words: string[];
+  words: readonly string[];
   /** Clase extra para el contenedor (tamaño/tipografía via CSS) */
   className?: string;
   /** El bucle solo se monta cuando `active` es true (default true) */

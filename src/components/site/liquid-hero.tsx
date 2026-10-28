@@ -338,8 +338,8 @@ type EngineOpts = {
   bg: [number, number, number];
 };
 
-const TEX_W = 1024; // ancho de las texturas de partículas
-const FLOW_W = 256; // resolución del campo de flujo
+const TEX_W = 768; // ancho de las texturas de partículas
+const FLOW_W = 192; // resolución del campo de flujo
 const SETTLE_FRAMES = 270; // frames de calma antes de dormir el RAF
 
 type Rect = { x: number; y: number; w: number; h: number };
@@ -349,7 +349,7 @@ class LiquidEngine {
   private opts: EngineOpts;
   private onFail: () => void;
 
-  private pFlow: Prog; private pSim: Prog; private pPart: Prog; private pImg: Prog;
+  private pFlow!: Prog; private pSim!: Prog; private pPart!: Prog; private pImg!: Prog;
   private vao: WebGLVertexArrayObject | null = null;
   private quad: WebGLBuffer | null = null;
 
@@ -522,7 +522,9 @@ class LiquidEngine {
 
   private buildParticles(img: HTMLImageElement) {
     const gl = this.gl;
-    const base = this.lowPower ? 640 : 1000;
+    // Conserva la textura orgánica del efecto sin monopolizar la GPU durante
+    // la carga inicial. La versión anterior podía superar 300k partículas.
+    const base = this.lowPower ? 420 : 720;
     const gw = Math.round(base * Math.sqrt(clamp(this.opts.density, 0.15, 2)));
     const gh = Math.max(1, Math.round(gw / this.aspect));
     this.gridW = gw;
@@ -1023,7 +1025,7 @@ export function LiquidHero() {
     touchQuery.addEventListener?.("change", syncTouch);
 
     let engine: LiquidEngine | null = null;
-    const fail = () => { root.dataset.gl = "off"; };
+    const fail = () => setGlOn(false);
     try {
       engine = new LiquidEngine(canvas, {
         reducedMotion: rmQuery.matches,
@@ -1048,7 +1050,7 @@ export function LiquidHero() {
       im.crossOrigin = "anonymous";
       im.onload = () => {
         img.src = src;
-        try { engineRef.current?.setImage(im); root.dataset.gl = "on"; setGlOn(true); }
+        try { engineRef.current?.setImage(im); setGlOn(true); }
         catch { fail(); }
         /* cuando el <img> de fallback ya conoce su tamaño natural,
            se recalcula el layout (aspect correcto desktop/móvil) */
@@ -1084,12 +1086,15 @@ export function LiquidHero() {
         im.style.top = `${rect.y}px`;
         im.style.width = `${rect.w}px`;
         im.style.height = `${rect.h}px`;
+        /* Fix-CLS: revelar el fallback solo tras su primer posicionamiento */
+        im.dataset.sized = "1";
       }
       /* hint centrado sobre la escultura */
       const hint = root.querySelector<HTMLElement>(".sh-hint");
       if (hint) {
         hint.style.left = `${rect.x + rect.w / 2}px`;
         hint.style.top = `${rect.y - 26}px`;
+        hint.dataset.positioned = "1";
       }
     };
     layout();
@@ -1160,7 +1165,7 @@ export function LiquidHero() {
       ref={rootRef as React.RefObject<HTMLElement>}
       id="inicio"
       className="sh-root"
-      data-gl="off"
+      data-gl={glOn ? "on" : "off"}
       data-touched={touched ? "1" : "0"}
       style={{
         "--sh-bg": CONFIG.bg,
