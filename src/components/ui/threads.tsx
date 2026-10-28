@@ -30,7 +30,8 @@ import { useEffect, useRef } from "react";
      (un campo uniforme desplazado se vería igual a sí mismo).
    · Rendimiento: solo anima con la sección en pantalla
      (IntersectionObserver) y con la pestaña visible; dpr con tope
-     1.5; prefers-reduced-motion → un solo fotograma estático.
+     2 y presupuesto de ~7 Mpx (v1.45); prefers-reduced-motion →
+     un solo fotograma estático.
    ──────────────────────────────────────────────────────────────── */
 
 export type ThreadsProps = {
@@ -296,7 +297,14 @@ export default function Threads({
           lineCount * Math.min(1, Math.max(0.5, aspect / 1.6)),
         ),
       );
-      dpr = Math.min(window.devicePixelRatio || 1, 1.5);
+      /* v1.45 — definición HD: tope DPR 2 (antes 1,5, que en
+         pantallas retina difuminaba los hilos y los apagaba)
+         con presupuesto de ~7 Mpx para no disparar el coste del
+         fragment a pantalla completa en monitores 4K. */
+      dpr = Math.min(window.devicePixelRatio || 1, 2);
+      if (cssW * cssH * dpr * dpr > 7.0e6) {
+        dpr = Math.max(1, Math.sqrt(7.0e6 / (cssW * cssH)));
+      }
       const w = Math.max(1, Math.round(cssW * dpr));
       const h = Math.max(1, Math.round(cssH * dpr));
       if (canvas.width !== w || canvas.height !== h) {

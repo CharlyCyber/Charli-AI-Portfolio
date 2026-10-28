@@ -9,7 +9,6 @@ import { Services } from "@/components/site/services";
 import { Autodidact } from "@/components/site/autodidact";
 import { DarkStatement } from "@/components/site/dark-statement";
 import { Pricing } from "@/components/site/pricing";
-import { CTA } from "@/components/site/cta";
 import { Footer } from "@/components/site/footer";
 import { CookieBanner } from "@/components/site/cookie-banner";
 
@@ -34,7 +33,10 @@ export default function Home() {
           <Autodidact />
           <DarkStatement />
           <Pricing />
-          <CTA />
+          {/* v1.45: la sección «Contacto» (CTA) se eliminó por
+              completo — el cierre de la página es Tarifas y el
+              bloque «¿Tienes un proyecto en mente?» del footer,
+              cuyo botón abre WhatsApp directo. */}
         </main>
         <Footer />
       </div>

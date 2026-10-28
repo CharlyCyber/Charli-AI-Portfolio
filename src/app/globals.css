@@ -550,57 +550,11 @@ html.lenis body {
   }
 }
 
-/* ── Marquee ───────────────────────────────────────────────── */
-@keyframes marquee-x {
-  from {
-    transform: translateX(0);
-  }
-  to {
-    transform: translateX(-50%);
-  }
-}
-.animate-marquee {
-  animation: marquee-x var(--marquee-duration, 32s) linear infinite;
-}
-.marquee-mask {
-  mask-image: linear-gradient(
-    to right,
-    transparent,
-    black 8%,
-    black 92%,
-    transparent
-  );
-}
-
-/* ── Cordón gigante (marquee Anton) ──────────────────────────
-   Las palabras del cordón del «Quién soy» en la fuente display
-   Anton ya integrada en el sitio (la del wordmark del hero):
-   mayúsculas enormes en bucle continuo. Al pasar el cursor por
-   encima de cada palabra, ésta se llena de lima, se inclina y
-   da un pequeño salto — el cordón entero respira. */
-.marquee-word {
-  display: inline-block;
-  font-family: "Anton", "Switzer", sans-serif;
-  font-size: clamp(2.25rem, 7.5vw, 5rem);
-  line-height: 1.06;
-  letter-spacing: 0.015em;
-  text-transform: uppercase;
-  white-space: nowrap;
-  color: var(--color-ink);
-  transform-origin: 50% 62%;
-  transition:
-    color 0.3s cubic-bezier(0.22, 1, 0.36, 1),
-    transform 0.3s cubic-bezier(0.22, 1, 0.36, 1);
-}
-.marquee-word:hover {
-  color: var(--color-lime-deep);
-  transform: skewX(-9deg) scale(1.05) translateY(-3px);
-}
-@media (prefers-reduced-motion: reduce) {
-  .marquee-word {
-    transition: none;
-  }
-}
+/* ── Marquesina curva ────────────────────────────────────────
+   v1.45: la antigua tira rectangular (`.animate-marquee` +
+   `.marquee-word` en Anton) fue sustituida por CurvedLoop
+   (ui/curved-text-loop.tsx), que anima un `<textPath>` SVG por
+   rAF y no necesita CSS aquí. */
 
 /* ── Pulse dot ─────────────────────────────────────────────── */
 @keyframes pulse-dot {
@@ -902,9 +856,6 @@ html.lenis body {
 
 /* ── Reduced motion ────────────────────────────────────────── */
 @media (prefers-reduced-motion: reduce) {
-  .animate-marquee {
-    animation: none;
-  }
   /* el honeycomb del loader se mantiene animado siempre: es una
      pantalla breve (<3s) y el usuario pidió conservar su animación */
 }

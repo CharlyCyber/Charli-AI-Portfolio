@@ -28,6 +28,42 @@ servicios, proyectos, tarifas (CUP/USD) y contacto — íntegramente en español
 > FlowingMenu: React Bits (flowing-menu.tsx, con extensión táctil propia) · Squares:
 > React Bits (squares.tsx)
 
+## ✨ Novedades v1.45 — Ondas HD · Sin sección Contacto · Vídeos inmediatos · Marquesina curva · Titular shutter
+
+- **Ondas con la definición recuperada**: la escultura líquida del hero estaba
+  capada (rejilla de 420/720, DPR ≤1,5 en cualquier móvil y borde de partícula
+  al 50 % de alfa → imagen opaca). Ahora hay 3 niveles de calidad según el
+  dispositivo (rejilla 520/760/980, DPR ≤2 con presupuesto de píxeles),
+  antialias por `fwidth` (interior al 100 %, solo se suaviza el último píxel)
+  y leve realce de saturación/contraste. Los hilos ondulantes (Threads) de
+  «Quién soy» suben a DPR 2 con más brillo y grosor.
+- **Eliminada la sección «Contacto»** (el CTA «Empieza tu proyecto con
+  CHARLI»): el cierre de la página es Tarifas → «¿Tienes un proyecto en
+  mente?» (footer), y **su botón «Empezar proyecto» es ahora el de WhatsApp
+  directo** (wa.me con el mensaje ya redactado). Todos los enlaces que iban a
+  `#contacto` aterrizan en `#proyecto-en-mente`.
+- **Vídeos que ya están cuando llegas**: los tres MP4 (13,6 MB, con el átomo
+  `moov` al final = sin reproducción hasta descargar casi todo) están
+  re-codificados con `+faststart` y pesan 4,0 MB en total (Enfoque de
+  trabajo: `mixkit-44818`; Motion & Diseño Gráfico: `works-ticker`;
+  Dirección creativa que respira: `mixkit-4192-screens`). `LazyVideo` carga a
+  2.000 px de distancia o con el navegador en reposo tras abrir la página,
+  `preload="auto"`, pausa fuera de pantalla y **póster = fotograma real** del
+  propio vídeo (antes mostraba fotos ajenas de relleno).
+- **Tarjeta elástica 3D sin espera**: monta a 2.500 px o en el primer reposo
+  del navegador (su rAF ya se pausaba sola fuera de pantalla); la foto
+  estática queda solo como fallback sin WebGL y se funde al estar lista,
+  sin corte brusco.
+- **Marquesina curva bajo «Colaboración en tiempo real»**: la tira
+  rectangular se sustituye por **CurvedLoop** (21st.dev) — las mismas
+  palabras recorren un arco en bucle infinito lento y arrastrable. Sin
+  `setState` a 60 fps, con pausa fuera de pantalla y respeto a
+  `prefers-reduced-motion`.
+- **«Proyectos destacados» a secas y centrado**: fuera la etiqueta
+  «Proyectos» y el botón «Ver todos los trabajos»; el titular lleva el
+  efecto **shutter** (rebanadas que barren cada letra, clic = repetir),
+  adaptado de pantalla hero a titular de sección, en la paleta del sitio.
+
 ## ✨ Novedades v1.44 — Threads interactivo · Imágenes de servicios · Trazo 2:1
 
 - **Fondo Threads (React Bits) en «Quién soy»**: desde el slide AUTODIDACTA hasta

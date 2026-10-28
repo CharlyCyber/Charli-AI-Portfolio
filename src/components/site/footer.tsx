@@ -76,12 +76,14 @@ export function Footer() {
 
       {/* Big contact statement — ancla del botón «Contacto» de la
           barra superior: el usuario aterriza justo en «¿Tienes un
-          proyecto en mente?». Id propio para no tocar el `#contacto`
-          de la sección CTA que usan el resto de enlaces.
-          v1.44: sin email en el bloque — fondo 3D Squares + CTA
-          «Empezar proyecto» (Magnetic) que lleva a la sección
-          #contacto; la columna «Pongámonos en contacto» del pie
-          conserva el email (contenido v1.20 no reclamado). */}
+          proyecto en mente?».
+          v1.45: eliminada la sección «Contacto» (CTA) — este
+          bloque es ahora el único cierre de conversión y su botón
+          «Empezar proyecto» (Magnetic) es el de WhatsApp directo
+          (wa.me con el mensaje ya redactado). Todos los enlaces
+          que antes iban a `#contacto` aterrizan aquí
+          (`#proyecto-en-mente`); la columna «Pongámonos en
+          contacto» del pie conserva el email. */}
       <div id="proyecto-en-mente" className="relative border-b border-white/[0.08]">
         <FooterSquares />
         <div className="relative mx-auto max-w-[1320px] px-4 py-16 sm:px-6 sm:py-24">
@@ -98,9 +100,13 @@ export function Footer() {
                 <Magnetic className="inline-block">
                   <FlipGroup>
                     <a
-                      href="#contacto"
+                      href="https://wa.me/5353463755?text=Hola%20Charli%2C%20quiero%20empezar%20un%20proyecto"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      aria-label="Empezar proyecto por WhatsApp directo"
                       className="group inline-flex items-center gap-2.5 rounded-full bg-lime px-8 py-4 text-[15px] font-semibold text-ink transition-transform duration-300 hover:scale-[1.04] active:scale-95"
                     >
+                      <MessageCircle className="size-4" />
                       <span>{flipWords("Empezar proyecto")}</span>
                       <ArrowUpRight className="size-4 transition-transform duration-300 group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
                     </a>

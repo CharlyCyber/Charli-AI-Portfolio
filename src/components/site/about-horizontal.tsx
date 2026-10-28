@@ -170,7 +170,10 @@ export function AboutHorizontal() {
          en su alto intrínseco (150px), no a pantalla completa. */
       background={
         <div className="h-full bg-[#0f1011]">
-          <Threads color="#ffffff" className="h-full" />
+          {/* v1.45: brillo y grosor un punto por encima del
+              default — con el DPR ya sin capar a 1,5 los hilos
+              (las ondas) recuperan la definición HD sin velarse */}
+          <Threads color="#ffffff" brightness={1.25} thickness={1.6} className="h-full" />
         </div>
       }
       wordClassName="text-paper"

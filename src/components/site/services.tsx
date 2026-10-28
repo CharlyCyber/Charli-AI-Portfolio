@@ -95,7 +95,7 @@ export function Services() {
           <div className="group relative aspect-[16/9] w-full overflow-hidden rounded-[28px] bg-[#0a0a0b] sm:aspect-[21/6]">
             <LazyVideo
               src="/videos/mixkit-4192-screens.mp4"
-              poster="/images/svc-web.jpg"
+              poster="/images/mixkit-4192-screens-poster.jpg"
               className="h-full w-full object-cover transition-transform duration-[1200ms] ease-out group-hover:scale-[1.03]"
               autoPlay
               muted
@@ -189,7 +189,7 @@ export function Services() {
                             ))}
                           </div>
                           <a
-                            href="#contacto"
+                            href="#proyecto-en-mente"
                             className="mt-4 inline-flex items-center gap-1.5 text-[13.5px] font-semibold link-sweep"
                           >
                             <SpecialText inView speed={15}>
