@@ -29,6 +29,37 @@ servicios, proyectos, tarifas (CUP/USD) y contacto — íntegramente en español
 > FlowingMenu: React Bits (flowing-menu.tsx, con extensión táctil propia) · Squares:
 > React Bits (squares.tsx)
 
+## ✨ Novedades v1.47 — Threads de React Bits · Favicon alien · Miniatura del hero · Tarjeta 3D sin z-fighting
+
+- **Nuevo fondo del tramo 01 AUTODIDACTA → 05 DISEÑO**: el `Threads` propio de
+  rayas verticales soleadas se sustituye por la **versión oficial de React
+  Bits** (TypeScript + CSS, WebGL2) con las props exactas del ejemplo del
+  usuario: manojo de 90 hilos blancos a 25° que ondulan y reaccionan al
+  cursor. Dos únicas adaptaciones marcadas en el código: no se congela con
+  `prefers-reduced-motion` (el fondo debe verse animado en la vista previa
+  del propietario, mismo precedente que la marquesina en v1.46) y la
+  sincronización de `settingsRef` vive en un efecto por la regla
+  `react-hooks/refs` del lint.
+- **El icono de la pestaña es el alien de la navbar**: el antiguo `/logo.svg`
+  declarado en los iconos no era el alien (era otro glifo) y los navegadores
+  modernos lo preferían sobre el `.ico`, así que en PC no salía el alien.
+  `favicon.ico` (16–64), `icon-192.png`, `icon-512.png` y
+  `apple-touch-icon.png` se regeneran en cuadrado desde `images/logo.jpeg`;
+  el SVG ajeno se elimina.
+- **Al compartir el enlace, miniatura del hero**: `SITE_URL` apuntaba al
+  dominio del portafolio antiguo (`portafolio-charli.vercel.app`), de modo
+  que la imagen de la vista previa se resolvía contra el sitio equivocado.
+  Corregido a `charli-ai-portfolio.vercel.app` (layout, sitemap y línea
+  `Sitemap:` en robots.txt) y `og.jpg` (1200×630) es una captura real del
+  hero; se retira el `og.png` de la gráfica antigua.
+- **Tarjeta elástica 3D sin «problemas gráficos»**: era z-fighting clásico —
+  las caras con la foto iban a solo 0.0006 unidades de la tapa plana del
+  cuerpo extruido y ambas triangulaciones se peleaban el buffer de
+  profundidad dejando tronchos triangulares claros comiéndose las imágenes.
+  Separación ×5 (0.003, invisible de perfil), `polygonOffset` en los
+  materiales de las caras y `near`/`far` de cámara acotados a la escena
+  (precisión ~50×). Física y aspecto intactos.
+
 ## ✨ Novedades v1.46 — Precios con blob de degradado · Marquesina en movimiento constante
 
 - **Las 3 tarjetas de precios visten GradientBlobCard** (21st.dev, en
