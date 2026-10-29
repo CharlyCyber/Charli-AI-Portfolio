@@ -994,12 +994,20 @@ const Lanyard = ({
     const frontMaterial = new THREE.MeshPhysicalMaterial({
       map: frontTexture,
       normalMap: grain,
-      normalScale: new THREE.Vector2(0.06, 0.06)
+      normalScale: new THREE.Vector2(0.06, 0.06),
+      /* v1.47: sesgo de profundidad hacia la cámara para que la
+         cara nunca empate con la tapa del cuerpo (z-fighting) */
+      polygonOffset: true,
+      polygonOffsetFactor: -2,
+      polygonOffsetUnits: -4
     });
     const backMaterial = new THREE.MeshPhysicalMaterial({
       map: backTexture,
       normalMap: grain,
-      normalScale: new THREE.Vector2(0.06, 0.06)
+      normalScale: new THREE.Vector2(0.06, 0.06),
+      polygonOffset: true,
+      polygonOffsetFactor: -2,
+      polygonOffsetUnits: -4
     });
     frontMaterial.onBeforeCompile = injectFoil;
     backMaterial.onBeforeCompile = injectFoil;
@@ -1097,6 +1105,12 @@ const Lanyard = ({
       const viewWidth = viewHeight * aspect;
       camera.aspect = aspect;
       camera.position.set(0, 0, viewHeight / 2 / Math.tan((FOV * Math.PI) / 360));
+      /* v1.47: precisión de depth — los near/far de fábrica (0.1/200)
+         desperdiciaban el buffer y amplificaban el z-fighting entre
+         cara y cuerpo; acotados a la escena (todo vive en torno a
+         z=0 a ±viewHeight) la precision mejora ~50×. */
+      camera.near = Math.max(0.5, camera.position.z - viewHeight);
+      camera.far = camera.position.z + viewHeight * 2;
       camera.lookAt(0, 0, 0);
       camera.updateProjectionMatrix();
       camera.updateMatrixWorld();
@@ -1125,9 +1139,16 @@ const Lanyard = ({
         bodyMesh.geometry = geometry.body;
         frontMesh.geometry = geometry.face;
         backMesh.geometry = geometry.face.clone();
-        frontMesh.position.z = THICKNESS / 2 + BEVEL + 0.0006;
+        /* v1.47 — anti z-fighting: las caras iban a solo 0.0006 de la
+           tapa plana del cuerpo extruido y las dos triangulaciones se
+           peleaban el depth buffer dejando TRONCHOS triangulares
+           claros comiéndose la foto («problemas gráficos»). Con
+           0.003 (×5, aún por debajo del bisel 0.007, invisible de
+           perfil) + polygonOffset en los materiales + near/far
+           ajustados en frameView, la cara siempre gana. */
+        frontMesh.position.z = THICKNESS / 2 + BEVEL + 0.003;
         backMesh.rotation.y = Math.PI;
-        backMesh.position.z = -(THICKNESS / 2 + BEVEL + 0.0006);
+        backMesh.position.z = -(THICKNESS / 2 + BEVEL + 0.003);
         ring.position.set(0, layout.ringY, 0);
         applied.framingKey = '';
       }
