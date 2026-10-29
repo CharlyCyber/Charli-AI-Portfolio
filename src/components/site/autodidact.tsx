@@ -364,11 +364,11 @@ export function Autodidact() {
         </Reveal>
       </div>
 
-      {/* Marquesina curva (v1.45) — las palabras ya no viajan en
-          una tira rectangular: recorren un arco en bucle infinito
-          LENTO (CurvedLoop de 21st.dev, ver ui/curved-text-loop).
-          Interactiva: arrastrar la curva cambia su velocidad y
-          sentido en tiempo real, como en la demo original. La
+      {/* Marquesina curva — las palabras recorren un arco en
+          bucle infinito LENTO (CurvedLoop de 21st.dev, ver
+          ui/curved-text-loop). v1.46: movimiento CONSTANTE hacia
+          la izquierda, sin depender de arrastre con cursor ni
+          dedo (fuera la interacción de la demo original). La
           lista de habilidades es decorativa aquí (se repite en
           el resto de la sección), por eso va aria-hidden. */}
       <div
@@ -380,8 +380,6 @@ export function Autodidact() {
             marqueeText={CURVED_TEXT}
             speed={0.55}
             curveAmount={160}
-            direction="left"
-            interactive
             className="fill-ink"
           />
         </div>

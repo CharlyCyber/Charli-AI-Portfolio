@@ -7,6 +7,7 @@ import { FlipGroup, flipWords } from "@/components/ui/flip-links";
 import { MaskLines, Reveal, EASE_OUT } from "./anim";
 import { SpecialText } from "@/components/ui/special-text";
 import FlowingMenu, { type FlowingMenuItem } from "@/components/ui/flowing-menu";
+import GradientBlobCard from "@/components/ui/gradient-bold-card";
 
 type Tier = {
   name: string;
@@ -265,23 +266,38 @@ export function Pricing() {
             transition={{ duration: 0.5, ease: EASE_OUT }}
             className="mt-12 grid gap-5 lg:grid-cols-3"
           >
+            {/* v1.46 — las 3 tarjetas visten el GradientBlobCard
+                (ui/gradient-bold-card.tsx): cristal con el blob
+                rosa→rojo→amarillo recorriendo las esquinas tras
+                el contenido. La destacada usa el tono oscuro del
+                componente (ya era la tarjeta tinta); cada blob
+                va desincronizado (−i·1,7 s) para que las tres no
+                pulsen a la vez. La insignia «Más popular» vive
+                FUERA de la caja con overflow-hidden (dentro, el
+                −top-3 quedaría recortado por el borde). */}
             {tiers.map((t, i) => (
               <motion.article
                 key={t.name}
                 initial={{ opacity: 0, y: 36 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.6, delay: i * 0.09, ease: EASE_OUT }}
-                className={`relative flex h-full flex-col rounded-[28px] border p-7 transition-shadow duration-500 sm:p-8 ${
-                  t.featured
-                    ? "border-ink bg-ink text-white shadow-[0_32px_80px_-28px_rgba(15,16,17,0.5)]"
-                    : "border-black/[0.08] bg-white hover:shadow-[0_24px_60px_-28px_rgba(15,16,17,0.25)]"
-                }`}
+                className="relative h-full"
               >
                 {t.featured && (
-                  <span className="absolute -top-3 left-7 rounded-full bg-lime px-3.5 py-1 text-[11px] font-semibold uppercase tracking-[0.12em] text-ink">
+                  <span className="absolute -top-3 left-7 z-20 rounded-full bg-lime px-3.5 py-1 text-[11px] font-semibold uppercase tracking-[0.12em] text-ink">
                     <SpecialText inView>Más popular</SpecialText>
                   </span>
                 )}
+                <GradientBlobCard
+                  tone={t.featured ? "dark" : "light"}
+                  blobDelay={-i * 1.7}
+                  className="h-full"
+                >
+                <div
+                  className={`flex h-full flex-col p-7 sm:p-8 ${
+                    t.featured ? "text-white" : ""
+                  }`}
+                >
                 <h3 className="text-[15px] font-semibold uppercase tracking-[0.1em] opacity-80">
                   <SpecialText inView delay={i * 0.08} speed={17}>
                     {t.name}
@@ -344,6 +360,8 @@ export function Pricing() {
                     </a>
                   </FlipGroup>
                 </div>
+                </div>
+                </GradientBlobCard>
               </motion.article>
             ))}
           </motion.div>
