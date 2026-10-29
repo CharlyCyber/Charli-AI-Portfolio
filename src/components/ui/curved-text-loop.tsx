@@ -20,6 +20,21 @@
    Solo se sigue pausando FUERA de pantalla (IntersectionObserver,
    invisible para el visitante) por rendimiento.
 
+   v1.48 — visible desde el primer pintado: antes la franja no
+   renderizaba NADA (contenedor en `visibility: hidden`, sin
+   <textPath>) hasta que un efecto cliente medía el texto tras
+   la hidratación. Con caché fría tras un despliegue y conexión
+   lenta, la hidratación puede tardar decenas de segundos (el
+   JS del sitio es grande) y la franja se quedaba como una
+   banda blanca vacía — «no aparecen las letras». Ahora el
+   <textPath> se renderiza ya en servidor con un espaciado
+   ESTIMADO (ancho medio de glifo × nº de caracteres): las
+   letras se ven estáticas desde el primer pintado aunque el
+   JS tarde o incluso si falla. Al hidratar se mide el ancho
+   real (y se remide cuando las fuentes terminan de cargar y
+   ante cualquier resize) y la animación arranca sin saltos
+   desde la posición actual.
+
    Otras adaptaciones respecto al código pegado:
    · Sin `setState` por fotograma: el original llamaba a
      `setOffset` en cada rAF (re-render a 60 fps de todo el
@@ -43,6 +58,13 @@ export interface CurvedLoopProps {
   curveAmount?: number;
 }
 
+/* Ancho medio estimado por carácter en unidades SVG para el
+   tamaño de letra de esta franja (4 rem, peso black, mayúsculas):
+   el texto real de la sección mide ≈ 33,8/caracter. Solo se usa
+   para el primer pintado (servidor / pre-hidratación); tras
+   montar se sustituye por la medición exacta. */
+const ESTIMATED_CHAR_WIDTH = 34;
+
 export const CurvedLoop: FC<CurvedLoopProps> = ({
   marqueeText = "CURVED MARQUEE • INTERACTIVE LOOP • 21ST.DEV • ",
   speed = 2,
@@ -58,6 +80,7 @@ export const CurvedLoop: FC<CurvedLoopProps> = ({
   const measureRef = useRef<SVGTextElement | null>(null);
   const textPathRef = useRef<SVGTextPathElement | null>(null);
   const pathRef = useRef<SVGPathElement | null>(null);
+  const placedRef = useRef(false);
   const [spacing, setSpacing] = useState(0);
   const [offset, setOffset] = useState(0);
   const [inView, setInView] = useState(false);
@@ -65,24 +88,67 @@ export const CurvedLoop: FC<CurvedLoopProps> = ({
   const pathId = `curve-${uid.replace(/:/g, "")}`;
   const pathD = `M-100,40 Q500,${40 + curveAmount} 1540,40`;
 
-  const textLength = spacing;
-  const totalText = textLength
-    ? Array(Math.ceil(1800 / textLength) + 2)
-        .fill(text)
-        .join("")
-    : text;
-  const ready = spacing > 0;
+  /* v1.48: espaciado efectivo desde el primer render — estimado
+     hasta que la medición real lo sustituya. El <textPath> se
+     pinta SIEMPRE (también en servidor), así las letras nunca
+     dependen de que la hidratación haya terminado. */
+  const effectiveSpacing =
+    spacing > 0 ? spacing : Math.max(1, text.length) * ESTIMATED_CHAR_WIDTH;
+  const totalText = Array(Math.ceil(1800 / effectiveSpacing) + 3)
+    .fill(text)
+    .join("");
+  /* La animación sí necesita la medición real (envoltura sin
+     costuras), pero la visibilidad ya no depende de ella. */
+  const measured = spacing > 0;
 
+  /* Medir el ancho real de UNA copia del texto: al montar, cuando
+     las fuentes acaban de cargar (la métrica con la fuente de
+     reserva difiere — aquí 6404 → 5274) y ante cualquier cambio
+     de tamaño del marco. Si la medición da 0 (SVG aún sin layout),
+     se conserva la estimación y se reintenta en los siguientes
+     disparadores — nunca se queda en blanco. */
   useEffect(() => {
-    if (measureRef.current) setSpacing(measureRef.current.getComputedTextLength());
+    let cancelled = false;
+    const measure = () => {
+      const node = measureRef.current;
+      if (!node || cancelled) return;
+      let width = 0;
+      try {
+        width = node.getComputedTextLength();
+      } catch {
+        width = 0;
+      }
+      if (width > 0) {
+        setSpacing((prev) => (Math.abs(prev - width) > 0.5 ? width : prev));
+      }
+    };
+    measure();
+    if (typeof document !== "undefined" && "fonts" in document) {
+      document.fonts.ready.then(measure).catch(() => {});
+    }
+    const host = hostRef.current;
+    const observer =
+      host && "ResizeObserver" in window ? new ResizeObserver(measure) : null;
+    if (host && observer) observer.observe(host);
+    return () => {
+      cancelled = true;
+      observer?.disconnect();
+    };
   }, [text, className]);
 
+  /* Colocación inicial SOLO la primera vez que se mide: saltar a
+     -spacing es visualmente idéntico a 0 (una copia exacta antes)
+     y deja el intervalo de envoltura (-spacing, 0] preparado. En
+     remediciones posteriores NO se toca la posición: la
+     animación reinicia leyendo el startOffset actual y la
+     envoltura modular conserva el punto exacto de la curva. */
   useEffect(() => {
-    if (!spacing) return;
+    if (!spacing || placedRef.current) return;
     if (textPathRef.current) {
       const initial = -spacing;
       textPathRef.current.setAttribute("startOffset", initial + "px");
       setOffset(initial);
+      placedRef.current = true;
     }
   }, [spacing]);
 
@@ -108,7 +174,7 @@ export const CurvedLoop: FC<CurvedLoopProps> = ({
      e inmune a tirones — si un fotograma tarda, el siguiente
      cae exactamente donde debe, sin deriva ni frenazos. */
   useEffect(() => {
-    if (!spacing || !ready || !inView) return;
+    if (!measured || !inView) return;
     let frame = 0;
     const t0 = performance.now();
     const startOffset = parseFloat(
@@ -126,13 +192,12 @@ export const CurvedLoop: FC<CurvedLoopProps> = ({
     };
     frame = requestAnimationFrame(step);
     return () => cancelAnimationFrame(frame);
-  }, [spacing, speed, ready, inView]);
+  }, [spacing, speed, measured, inView]);
 
   return (
     <div
       ref={hostRef}
       className="relative flex w-full items-center justify-center overflow-hidden"
-      style={{ visibility: ready ? "visible" : "hidden" }}
     >
       <svg
         className="block aspect-[100/13] w-full select-none overflow-visible text-[4rem] font-black uppercase tracking-tight"
@@ -148,18 +213,16 @@ export const CurvedLoop: FC<CurvedLoopProps> = ({
         <defs>
           <path ref={pathRef} id={pathId} d={pathD} fill="none" stroke="transparent" />
         </defs>
-        {ready && (
-          <text xmlSpace="preserve" className={className ?? "fill-white"}>
-            <textPath
-              ref={textPathRef}
-              href={`#${pathId}`}
-              startOffset={offset + "px"}
-              xmlSpace="preserve"
-            >
-              {totalText}
-            </textPath>
-          </text>
-        )}
+        <text xmlSpace="preserve" className={className ?? "fill-white"}>
+          <textPath
+            ref={textPathRef}
+            href={`#${pathId}`}
+            startOffset={offset + "px"}
+            xmlSpace="preserve"
+          >
+            {totalText}
+          </textPath>
+        </text>
       </svg>
     </div>
   );

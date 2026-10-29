@@ -29,6 +29,23 @@ servicios, proyectos, tarifas (CUP/USD) y contacto — íntegramente en español
 > FlowingMenu: React Bits (flowing-menu.tsx, con extensión táctil propia) · Squares:
 > React Bits (squares.tsx)
 
+## ✨ Novedades v1.48 — Marquesina curva visible desde el primer pintado
+
+- **Las letras curvas ya no dependen de la hidratación**: tras el despliegue
+  de v1.47 la franja bajo «Colaboración en tiempo real» podía verse como
+  una banda blanca vacía. Causa: `CurvedLoop` no renderizaba nada
+  (`visibility: hidden`, sin `<textPath>`) hasta que un efecto cliente medía
+  el texto tras hidratar — y con la caché fría de un despliegue nuevo y una
+  conexión lenta, la hidratación de este sitio (JS grande) puede tardar
+  decenas de segundos (reproducido con red a 500 kbps + CPU ×1/8: la
+  marquesina no aparecía hasta los ~50 s). Ahora el `<textPath>` se
+  renderiza ya en servidor con un espaciado estimado — las letras están
+  visibles (estáticas) desde el primer pintado aunque el JS tarde o
+  falle — y al hidratar se mide el ancho real, se remide al terminar de
+  cargar las fuentes y ante cualquier resize, y la animación (constante
+  hacia la izquierda, igual que en v1.46) arranca sin saltos desde la
+  posición actual.
+
 ## ✨ Novedades v1.47 — Threads de React Bits · Favicon alien · Miniatura del hero · Tarjeta 3D sin z-fighting
 
 - **Nuevo fondo del tramo 01 AUTODIDACTA → 05 DISEÑO**: el `Threads` propio de
