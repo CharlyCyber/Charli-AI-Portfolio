@@ -28,6 +28,22 @@ servicios, proyectos, tarifas (CUP/USD) y contacto — íntegramente en español
 > FlowingMenu: React Bits (flowing-menu.tsx, con extensión táctil propia) · Squares:
 > React Bits (squares.tsx)
 
+## ✨ Novedades v1.46 — Precios con blob de degradado · Marquesina en movimiento constante
+
+- **Las 3 tarjetas de precios visten GradientBlobCard** (21st.dev, en
+  `ui/gradient-bold-card.tsx`): panel de cristal sobre un blob rosa→rojo→
+  amarillo que recorre las 4 esquinas en bucle de 5 s, visible difuminado
+  tras el contenido y como marco de color de 5 px, con la sombra neumórfica
+  doble del original. Adaptado de caja fija vacía (200×250) a contenedor con
+  contenido real (precio, features y botón intactos); la destacada usa el
+  cristal en tono oscuro, cada blob va desincronizado y los keyframes viven
+  una sola vez en `globals.css` (`.animate-blob-card`).
+- **Marquesina curva en movimiento constante**: fuera el arrastre (ni cursor
+  ni dedo) y fuera también la pausa ante `prefers-reduced-motion` — con esa
+  preferencia activa en el sistema la franja quedaba estática hasta tocarla.
+  Ahora las palabras avanzan solas hacia la izquierda sin parar, con
+  velocidad por tiempo (idéntica a 30/60/120 Hz, más suave).
+
 ## ✨ Novedades v1.45 — Ondas HD · Sin sección Contacto · Vídeos inmediatos · Marquesina curva · Titular shutter
 
 - **Ondas con la definición recuperada**: la escultura líquida del hero estaba

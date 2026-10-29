@@ -4,18 +4,26 @@
    CurvedLoop — marquesina infinita sobre una curva SVG
    (componente de 21st.dev pegado por el usuario).
 
-   El texto recorre un arco (`<textPath>`) en bucle continuo y se
-   puede arrastrar con el puntero para cambiar velocidad y sentido
-   en tiempo real. Integración en CHARLI AI (v1.45): sustituye a la
-   antigua tira rectangular de palabras bajo «Colaboración en
-   tiempo real» (ver autodidact.tsx), a velocidad lenta.
+   El texto recorre un arco (`<textPath>`) en bucle continuo,
+   SIEMPRE hacia la izquierda, a velocidad constante y suave
+   (por tiempo, no por fotogramas: se mueve igual a 30, 60 o
+   120 Hz). Integración en CHARLI AI: franja de palabras bajo
+   «Colaboración en tiempo real» (ver autodidact.tsx).
 
-   Adaptaciones respecto al código pegado (sin cambio visual):
+   v1.46 — movimiento constante SIN arrastre (petición del
+   usuario): se eliminó toda la interacción por puntero del
+   original (arrastrar cambiaba velocidad y sentido) y también
+   la pausa ante `prefers-reduced-motion` — con esa preferencia
+   activa en el sistema (el caso de la vista previa del cliente)
+   la franja quedaba estática hasta tocarla. Ahora nada depende
+   del cursor ni del dedo: la curva avanza sola, sin parar.
+   Solo se sigue pausando FUERA de pantalla (IntersectionObserver,
+   invisible para el visitante) por rendimiento.
+
+   Otras adaptaciones respecto al código pegado:
    · Sin `setState` por fotograma: el original llamaba a
      `setOffset` en cada rAF (re-render a 60 fps de todo el
-     componente). Aquí el bucle solo escribe `startOffset` por DOM;
-     el cursor «grabbing» pasa a un estado que cambia al
-     pulsar/soltar.
+     componente). Aquí el bucle solo escribe `startOffset` por DOM.
    · `fill-white` ya no se fuerza junto al `className` recibido
      (dos utilidades `fill-*` en conflicto): si el caller pasa su
      propio relleno, manda el suyo.
@@ -23,30 +31,16 @@
      en la demo el texto vive dentro de una tarjeta alta; aquí es
      una franja y la caja original dejaba ~140 px de aire muerto
      bajo el arco. La geometría del arco no cambia.
-   · `touch-pan-y`: en móvil el arrastre horizontal manipula la
-     curva sin bloquear el scroll vertical de la página.
-   · Pausa fuera de pantalla (IntersectionObserver) y respeto a
-     `prefers-reduced-motion` (curva estática, sin bucle).
    · Id de la curva sin los «:» de `useId` (referencia SVG segura).
    ──────────────────────────────────────────────────────────────── */
 
-import {
-  useRef,
-  useEffect,
-  useState,
-  useMemo,
-  useId,
-  type FC,
-  type PointerEvent,
-} from "react";
+import { useRef, useEffect, useState, useMemo, useId, type FC } from "react";
 
 export interface CurvedLoopProps {
   marqueeText?: string;
   speed?: number;
   className?: string;
   curveAmount?: number;
-  direction?: "left" | "right";
-  interactive?: boolean;
 }
 
 export const CurvedLoop: FC<CurvedLoopProps> = ({
@@ -54,8 +48,6 @@ export const CurvedLoop: FC<CurvedLoopProps> = ({
   speed = 2,
   className,
   curveAmount = 250,
-  direction = "left",
-  interactive = true,
 }) => {
   const text = useMemo(() => {
     const hasTrailing = /\s|\u00A0$/.test(marqueeText);
@@ -68,16 +60,10 @@ export const CurvedLoop: FC<CurvedLoopProps> = ({
   const pathRef = useRef<SVGPathElement | null>(null);
   const [spacing, setSpacing] = useState(0);
   const [offset, setOffset] = useState(0);
-  const [dragging, setDragging] = useState(false);
   const [inView, setInView] = useState(false);
   const uid = useId();
   const pathId = `curve-${uid.replace(/:/g, "")}`;
   const pathD = `M-100,40 Q500,${40 + curveAmount} 1540,40`;
-
-  const dragRef = useRef(false);
-  const lastXRef = useRef(0);
-  const dirRef = useRef<"left" | "right">(direction);
-  const velRef = useRef(0);
 
   const textLength = spacing;
   const totalText = textLength
@@ -100,7 +86,7 @@ export const CurvedLoop: FC<CurvedLoopProps> = ({
     }
   }, [spacing]);
 
-  /* Solo anima con la tira en pantalla */
+  /* Solo anima con la tira en pantalla (rendimiento) */
   useEffect(() => {
     const host = hostRef.current;
     if (!host || !("IntersectionObserver" in window)) {
@@ -115,70 +101,38 @@ export const CurvedLoop: FC<CurvedLoopProps> = ({
     return () => observer.disconnect();
   }, []);
 
+  /* Bucle constante hacia la izquierda. La posición se DERIVA
+     del tiempo transcurrido (speed = unidades por fotograma de
+     60 fps de referencia), no se acumula fotograma a fotograma:
+     la velocidad es matemáticamente la misma a 30, 60 o 120 Hz
+     e inmune a tirones — si un fotograma tarda, el siguiente
+     cae exactamente donde debe, sin deriva ni frenazos. */
   useEffect(() => {
     if (!spacing || !ready || !inView) return;
-    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
     let frame = 0;
-    const step = () => {
-      if (!dragRef.current && textPathRef.current) {
-        const delta = dirRef.current === "right" ? speed : -speed;
-        const currentOffset = parseFloat(
-          textPathRef.current.getAttribute("startOffset") || "0"
-        );
-        let newOffset = currentOffset + delta;
-        const wrapPoint = spacing;
-        if (newOffset <= -wrapPoint) newOffset += wrapPoint;
-        if (newOffset > 0) newOffset -= wrapPoint;
-        textPathRef.current.setAttribute("startOffset", newOffset + "px");
-      }
+    const t0 = performance.now();
+    const startOffset = parseFloat(
+      textPathRef.current?.getAttribute("startOffset") || "0"
+    );
+    const step = (now: number) => {
       frame = requestAnimationFrame(step);
+      if (!textPathRef.current) return;
+      const traveled = speed * ((now - t0) / (1000 / 60));
+      const raw = startOffset - traveled;
+      /* envuelve raw al intervalo (-spacing, 0] */
+      const wrapped = ((raw % spacing) + spacing) % spacing;
+      const next = wrapped === 0 ? 0 : wrapped - spacing;
+      textPathRef.current.setAttribute("startOffset", next + "px");
     };
     frame = requestAnimationFrame(step);
     return () => cancelAnimationFrame(frame);
   }, [spacing, speed, ready, inView]);
 
-  const onPointerDown = (e: PointerEvent) => {
-    if (!interactive) return;
-    dragRef.current = true;
-    setDragging(true);
-    lastXRef.current = e.clientX;
-    velRef.current = 0;
-    (e.target as HTMLElement).setPointerCapture(e.pointerId);
-  };
-
-  const onPointerMove = (e: PointerEvent) => {
-    if (!interactive || !dragRef.current || !textPathRef.current) return;
-    const dx = e.clientX - lastXRef.current;
-    lastXRef.current = e.clientX;
-    velRef.current = dx;
-    const currentOffset = parseFloat(
-      textPathRef.current.getAttribute("startOffset") || "0"
-    );
-    let newOffset = currentOffset + dx;
-    const wrapPoint = spacing;
-    if (newOffset <= -wrapPoint) newOffset += wrapPoint;
-    if (newOffset > 0) newOffset -= wrapPoint;
-    textPathRef.current.setAttribute("startOffset", newOffset + "px");
-  };
-
-  const endDrag = () => {
-    if (!interactive) return;
-    dragRef.current = false;
-    setDragging(false);
-    dirRef.current = velRef.current > 0 ? "right" : "left";
-  };
-
-  const cursorStyle = interactive ? (dragging ? "grabbing" : "grab") : "auto";
-
   return (
     <div
       ref={hostRef}
-      className="relative flex w-full touch-pan-y items-center justify-center overflow-hidden"
-      style={{ visibility: ready ? "visible" : "hidden", cursor: cursorStyle }}
-      onPointerDown={onPointerDown}
-      onPointerMove={onPointerMove}
-      onPointerUp={endDrag}
-      onPointerLeave={endDrag}
+      className="relative flex w-full items-center justify-center overflow-hidden"
+      style={{ visibility: ready ? "visible" : "hidden" }}
     >
       <svg
         className="block aspect-[100/13] w-full select-none overflow-visible text-[4rem] font-black uppercase tracking-tight"

@@ -556,6 +556,36 @@ html.lenis body {
    (ui/curved-text-loop.tsx), que anima un `<textPath>` SVG por
    rAF y no necesita CSS aquí. */
 
+/* ── Tarjetas con blob de degradado (v1.46) ───────────────────
+   El blob de las GradientBlobCard de precios (ui/
+   gradient-bold-card.tsx) recorre las 4 esquinas de la tarjeta
+   en un bucle cuadrado continuo — los keyframes EXACTOS del
+   componente pegado por el usuario, definidos una sola vez
+   aquí en vez de en un <style> por tarjeta. El blob se ancla
+   en el centro (top/left 50%) y los translate en % son sobre
+   su propio tamaño: -100%/-100% = cuadrante superior
+   izquierdo, 0/0 = inferior derecho, etc. */
+@keyframes blob-card {
+  0% {
+    transform: translate(-100%, -100%);
+  }
+  25% {
+    transform: translate(0%, -100%);
+  }
+  50% {
+    transform: translate(0%, 0%);
+  }
+  75% {
+    transform: translate(-100%, 0%);
+  }
+  100% {
+    transform: translate(-100%, -100%);
+  }
+}
+.animate-blob-card {
+  animation: blob-card 5s linear infinite;
+}
+
 /* ── Pulse dot ─────────────────────────────────────────────── */
 @keyframes pulse-dot {
   0%,
