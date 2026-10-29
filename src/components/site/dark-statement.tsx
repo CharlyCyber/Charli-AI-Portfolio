@@ -31,7 +31,7 @@ export function DarkStatement() {
       <motion.div style={{ y: videoY }} className="absolute inset-[-14%]">
         <LazyVideo
           src="/videos/mixkit-44818.mp4"
-          poster="/images/hero-bg-poster.jpg"
+          poster="/images/mixkit-44818-poster.jpg"
           className="h-full w-full object-cover opacity-40"
           autoPlay
           muted

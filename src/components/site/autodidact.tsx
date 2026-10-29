@@ -3,9 +3,10 @@
 import dynamic from "next/dynamic";
 import { useEffect, useRef, useState } from "react";
 import { motion } from "framer-motion";
-import { Asterisk, Code2, Cpu, MessageCircle, Terminal } from "lucide-react";
+import { Code2, Cpu, MessageCircle, Terminal } from "lucide-react";
 import { MaskLines, Reveal } from "./anim";
 import { SpecialText } from "@/components/ui/special-text";
+import { CurvedLoop } from "@/components/ui/curved-text-loop";
 const Lanyard = dynamic(() => import("@/components/ui/lanyard"), {
   ssr: false,
 });
@@ -29,6 +30,10 @@ const MARQUEE_ITEMS = [
   "Motion",
   "No-Low-Code",
 ];
+
+/* Texto de la marquesina curva (CurvedLoop): las mismas palabras
+   de siempre, separadas por el punto del componente original. */
+const CURVED_TEXT = `${MARQUEE_ITEMS.join(" • ")} • `;
 
 /* ─── Calibración de la tarjeta elástica ──────────────────────────────
    El lienzo del Lanyard cubre TODA la sección (overlay full-section:
@@ -66,6 +71,13 @@ function useCardCalibration() {
   const [calibration, setCalibration] = useState<CardCalibration | null>(null);
   const [shouldLoadLanyard, setShouldLoadLanyard] = useState(false);
 
+  /* v1.45 — la tarjeta elástica tardaba demasiado y mientras tanto
+     se veía la foto estática: el montaje (chunk de three.js +
+     texturas) solo empezaba a 500 px de la sección. Ahora arranca
+     a 2.500 px O en cuanto el navegador queda en reposo tras la
+     carga inicial, lo que ocurra primero — el Lanyard pausa solo
+     su rAF fuera de pantalla, así que montarlo antes no cuesta
+     animación, solo deja la tarjeta lista al llegar. */
   useEffect(() => {
     const section = sectionRef.current;
     if (!section) return;
@@ -76,11 +88,31 @@ function useCardCalibration() {
         setShouldLoadLanyard(true);
         observer.disconnect();
       },
-      { rootMargin: "500px 0px" }
+      { rootMargin: "2500px 0px" }
     );
     observer.observe(section);
     return () => observer.disconnect();
   }, []);
+
+  useEffect(() => {
+    if (shouldLoadLanyard) return;
+    const idleWindow = window as Window & {
+      requestIdleCallback?: (
+        cb: () => void,
+        options?: { timeout: number }
+      ) => number;
+      cancelIdleCallback?: (id: number) => void;
+    };
+    if (typeof idleWindow.requestIdleCallback === "function") {
+      const id = idleWindow.requestIdleCallback(
+        () => setShouldLoadLanyard(true),
+        { timeout: 6000 }
+      );
+      return () => idleWindow.cancelIdleCallback?.(id);
+    }
+    const timer = setTimeout(() => setShouldLoadLanyard(true), 5000);
+    return () => clearTimeout(timer);
+  }, [shouldLoadLanyard]);
 
   useEffect(() => {
     const section = sectionRef.current;
@@ -227,15 +259,22 @@ export function Autodidact() {
               logo), que cuelga del overlay full-section y reposa aquí —
               sobre esta zona, sin tapar el texto de la izquierda. */}
           <div ref={zoneRef} className="pointer-events-none relative aspect-[4/4.4]" aria-hidden="true">
-            {!lanyardReady && (
-              <div className="absolute inset-0 grid place-items-center">
-                <img
-                  src="/images/charli-perfil.jpg"
-                  alt=""
-                  className="h-auto w-[min(72vw,320px)] rounded-[1.45rem] border border-black/10 object-cover shadow-[0_24px_64px_-30px_rgba(15,16,17,0.55)]"
-                />
-              </div>
-            )}
+            {/* Foto estática SOLO como red de seguridad mientras la
+                tarjeta 3D pinta su primera textura (con la precarga
+                de v1.45 casi nunca se llega a ver) y como fallback
+                permanente si WebGL no está disponible. Al estar la
+                tarjeta lista se funde, sin el corte brusco de antes. */}
+            <div
+              className={`absolute inset-0 grid place-items-center transition-opacity duration-700 ease-out ${
+                lanyardReady ? "opacity-0" : "opacity-100"
+              }`}
+            >
+              <img
+                src="/images/charli-perfil.jpg"
+                alt=""
+                className="h-auto w-[min(72vw,320px)] rounded-[1.45rem] border border-black/10 object-cover shadow-[0_24px_64px_-30px_rgba(15,16,17,0.55)]"
+              />
+            </div>
           </div>
         </div>
 
@@ -325,22 +364,26 @@ export function Autodidact() {
         </Reveal>
       </div>
 
-      {/* Cordón gigante — bucle continuo en Anton (la fuente display
-          del wordmark del hero): mayúsculas enormes que se llenan de
-          lima, se inclinan y saltan al pasar el cursor por encima de
-          cada palabra. Asteriscos lima como separadores. */}
-      <div className="marquee-mask relative z-10 mt-16 overflow-hidden border-y border-black/[0.07] bg-white py-4 sm:py-5">
-        <div className="animate-marquee flex w-max items-center gap-x-8 pr-8 sm:gap-x-12 sm:pr-12 [--marquee-duration:34s]">
-          {[...MARQUEE_ITEMS, ...MARQUEE_ITEMS].map((item, i) => (
-            <span key={i} className="flex items-center gap-x-8 sm:gap-x-12">
-              <span className="marquee-word">{item}</span>
-              <Asterisk
-                className="size-7 shrink-0 text-lime-deep sm:size-9"
-                strokeWidth={2.5}
-                aria-hidden="true"
-              />
-            </span>
-          ))}
+      {/* Marquesina curva (v1.45) — las palabras ya no viajan en
+          una tira rectangular: recorren un arco en bucle infinito
+          LENTO (CurvedLoop de 21st.dev, ver ui/curved-text-loop).
+          Interactiva: arrastrar la curva cambia su velocidad y
+          sentido en tiempo real, como en la demo original. La
+          lista de habilidades es decorativa aquí (se repite en
+          el resto de la sección), por eso va aria-hidden. */}
+      <div
+        className="relative z-10 mt-16 overflow-hidden border-y border-black/[0.07] bg-white py-6 sm:py-8"
+        aria-hidden="true"
+      >
+        <div className="mx-auto w-full max-w-[1400px]">
+          <CurvedLoop
+            marqueeText={CURVED_TEXT}
+            speed={0.55}
+            curveAmount={160}
+            direction="left"
+            interactive
+            className="fill-ink"
+          />
         </div>
       </div>
 

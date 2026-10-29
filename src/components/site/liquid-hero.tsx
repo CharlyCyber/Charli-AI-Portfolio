@@ -42,7 +42,9 @@ const CONFIG = {
     "Low-Code",
   ],
   body: "Diseño experiencias digitales, sistemas creativos y automatizaciones potenciadas por IA — con la precisión de la ingeniería y el criterio del oficio.",
-  primaryCta: { label: "Reservar llamada", href: "#contacto" },
+  /* v1.45: sin sección «Contacto» — el CTA aterriza en «¿Tienes
+     un proyecto en mente?» (footer), cuyo botón es WhatsApp directo */
+  primaryCta: { label: "Reservar llamada", href: "#proyecto-en-mente" },
   secondaryCta: { label: "Ver proyectos", href: "#proyectos" },
   hint: "Mueve el cursor sobre la forma",
   hintTouch: "Toca la forma",
@@ -242,6 +244,13 @@ void main(){
   vHalfLen = len*0.5;
   vR = r;
   vec3 col = cl.rgb*uTint;
+  /* v1.45 — la muestra puntual de color se veía apagada: leve
+     realce de saturación + contraste (la escultura es
+     beige/gris sobre fondo claro; sin esto las ondas parecen
+     veladas por una capa gris). */
+  float luma = dot(col, vec3(0.299, 0.587, 0.114));
+  col = mix(vec3(luma), col, 1.14);
+  col = clamp((col - 0.5)*1.08 + 0.5, 0.0, 1.0);
   float glint = smoothstep(2.0, 16.0, sp);
   col = mix(col, min(col*1.18 + vec3(0.07,0.075,0.085), vec3(1.0)), glint*0.75);
   vCol = col;
@@ -261,7 +270,13 @@ out vec4 o;
 void main(){
   vec2 q = vec2(max(abs(vLocal.x)-vHalfLen, 0.0), vLocal.y);
   float d = length(q) - vR;
-  float a = clamp(0.5 - d*uDpr, 0.0, 1.0);
+  /* v1.45 — borde nítido «HD»: el rampa fija anterior
+     (0.5 - d*uDpr) dejaba el borde de cada partícula al 50% de
+     alfa y el interior lavado (la escultura se veía opaca). El
+     antialias derivado de fwidth mantiene el interior al 100% y
+     suaviza SOLO el último píxel del borde, a cualquier DPR. */
+  float aa = fwidth(d)*0.75 + 1e-4;
+  float a = 1.0 - smoothstep(-aa, aa, d);
   float tail = vHalfLen > 0.0 ? clamp(0.5 - vLocal.x/(2.0*(vHalfLen+vR)), 0.0, 1.0) : 0.0;
   a *= 1.0 - tail*0.55;
   a *= vA;
@@ -339,7 +354,7 @@ type EngineOpts = {
 };
 
 const TEX_W = 768; // ancho de las texturas de partículas
-const FLOW_W = 192; // resolución del campo de flujo
+const FLOW_W = 256; // resolución del campo de flujo (192→256 en v1.45: estelas más finas)
 const SETTLE_FRAMES = 270; // frames de calma antes de dormir el RAF
 
 type Rect = { x: number; y: number; w: number; h: number };
@@ -370,7 +385,17 @@ class LiquidEngine {
   private alphaMode = false;
   private imgBg: [number, number, number] = [0.918, 0.914, 0.906];
   private aspect = 2.5;
-  private lowPower = false;
+  /* v1.45 — calidad visual por niveles (sustituye al binario
+     lowPower, que condenaba a CUALQUIER móvil —aunque tuviera
+     GPU sobrada— a la rejilla gruesa de 420 y DPR 1,5: de ahí
+     que las ondas se vieran «opacas» y sin HD). Tres niveles
+     según puntero, núcleos y memoria declarada:
+       · alto:  rejilla 980, DPR ≤ 2,    presupuesto 9,0 Mpx
+       · medio: rejilla 760, DPR ≤ 1,75, presupuesto 6,5 Mpx
+       · bajo:  rejilla 520, DPR ≤ 1,5,  presupuesto 4,2 Mpx */
+  private gridBase = 760;
+  private maxDpr = 1.75;
+  private pixelBudget = 6.5e6;
 
   private rect: Rect = { x: 0, y: 0, w: 1, h: 1 };
   private cssW = 1; private cssH = 1;
@@ -417,11 +442,23 @@ class LiquidEngine {
     });
     if (!gl) throw new Error("WebGL2 unavailable");
     this.gl = gl;
-    this.lowPower =
-      (navigator.hardwareConcurrency || 8) <= 4 ||
-      (navigator as Navigator & { deviceMemory?: number }).deviceMemory !== undefined &&
-        (navigator as Navigator & { deviceMemory?: number }).deviceMemory! <= 4 ||
-      window.matchMedia("(pointer: coarse)").matches;
+    const cores = navigator.hardwareConcurrency || 8;
+    const memory = (navigator as Navigator & { deviceMemory?: number })
+      .deviceMemory;
+    const coarse = window.matchMedia("(pointer: coarse)").matches;
+    if (cores <= 4 || (memory !== undefined && memory <= 3)) {
+      /* gama baja real */
+      this.gridBase = 520;
+      this.maxDpr = 1.5;
+      this.pixelBudget = 4.2e6;
+    } else if (!coarse && cores >= 6) {
+      /* escritorio capaz: máxima definición */
+      this.gridBase = 980;
+      this.maxDpr = 2;
+      this.pixelBudget = 9.0e6;
+    }
+    /* resto (móviles/tabletas capaces y equipos intermedios):
+       los valores «medio» por defecto de los campos */
     this.initGL();
     canvas.addEventListener("webglcontextlost", (e) => {
       e.preventDefault(); this.lost = true; this.stop(); this.onFail();
@@ -523,8 +560,9 @@ class LiquidEngine {
   private buildParticles(img: HTMLImageElement) {
     const gl = this.gl;
     // Conserva la textura orgánica del efecto sin monopolizar la GPU durante
-    // la carga inicial. La versión anterior podía superar 300k partículas.
-    const base = this.lowPower ? 420 : 720;
+    // la carga inicial. Ancho de rejilla por nivel de calidad (v1.45;
+    // antes 420/720, demasiado grueso en pantallas grandes y retina).
+    const base = this.gridBase;
     const gw = Math.round(base * Math.sqrt(clamp(this.opts.density, 0.15, 2)));
     const gh = Math.max(1, Math.round(gw / this.aspect));
     this.gridW = gw;
@@ -614,9 +652,9 @@ class LiquidEngine {
   resize(w: number, h: number, rect: Rect) {
     this.cssW = Math.max(1, w); this.cssH = Math.max(1, h);
     this.rect = rect;
-    let dpr = Math.min(window.devicePixelRatio || 1, this.lowPower ? 1.5 : 2);
-    if (this.cssW * this.cssH * dpr * dpr > 4.5e6) {
-      dpr = Math.max(1, Math.sqrt(4.5e6 / (this.cssW * this.cssH)));
+    let dpr = Math.min(window.devicePixelRatio || 1, this.maxDpr);
+    if (this.cssW * this.cssH * dpr * dpr > this.pixelBudget) {
+      dpr = Math.max(1, Math.sqrt(this.pixelBudget / (this.cssW * this.cssH)));
     }
     const W = Math.round(this.cssW * dpr), H = Math.round(this.cssH * dpr);
     if (this.canvas.width !== W || this.canvas.height !== H) {

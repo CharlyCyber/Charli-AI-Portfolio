@@ -20,15 +20,15 @@ import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { motion } from "framer-motion";
 import {
-  ArrowRight,
   ArrowUpRight,
   Check,
   Copy,
   Terminal,
 } from "lucide-react";
-import { MaskLines, Reveal } from "./anim";
+import { Reveal } from "./anim";
 import { SpecialText } from "@/components/ui/special-text";
 import { LazyVideo } from "@/components/ui/lazy-video";
+import HeroText from "@/components/ui/hero-shutter-text";
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -418,32 +418,18 @@ function StickyWorks({ works }: { works: typeof WORKS }) {
 export function Works() {
   return (
     <section id="proyectos" className="py-20 sm:py-28">
+      {/* v1.45: cabecera reducida a «Proyectos destacados» a secas
+          — fuera la etiqueta «Proyectos» y el botón «Ver todos los
+          trabajos» — centrada y con el efecto shutter por
+          rebanadas de HeroText (clic = repetir el efecto). El
+          aria-label del h2 da el texto limpio a lectores de
+          pantalla; las letras animadas son decorativas. */}
       <div className="relative z-40 mx-auto max-w-[1320px] bg-paper px-4 sm:px-6">
-        <Reveal>
-          <p className="label-caps">
-            <SpecialText inView>
-              Proyectos
-            </SpecialText>
-          </p>
-        </Reveal>
-        <div className="mt-5 flex flex-wrap items-end justify-between gap-6">
-          <MaskLines
-            as="h2"
-            className="display-2"
-            lines={[<>Proyectos destacados</>]}
-          />
-          <Reveal delay={0.2}>
-            <a
-              href="#contacto"
-              className="group flex items-center gap-2 rounded-full border border-black/10 px-5 py-3 text-[14px] font-medium transition-all duration-300 hover:border-ink hover:bg-ink hover:text-white"
-            >
-              <SpecialText inView speed={15}>
-                Ver todos los trabajos
-              </SpecialText>
-              <ArrowRight className="size-4 transition-transform duration-300 group-hover:translate-x-1" />
-            </a>
-          </Reveal>
-        </div>
+        <h2 aria-label="Proyectos destacados" className="text-center">
+          <span aria-hidden="true">
+            <HeroText text="Proyectos destacados" />
+          </span>
+        </h2>
       </div>
 
       {/* ── Los 3 proyectos bajo el efecto de tarjetas apiladas ── */}
@@ -495,8 +481,9 @@ function MotionCard({
         whileHover="hover"
         animate="rest"
       >
-        {/* vídeo grande horizontal: 16/9 nativo (works-ticker es
-            1600×900) → sin recortes, a todo el ancho del contenedor */}
+        {/* vídeo grande horizontal: 16/9 nativo (works-ticker
+            re-codificado a 1280×720 con faststart en v1.45) → sin
+            recortes, a todo el ancho del contenedor */}
         <div className="relative aspect-[16/9] w-full overflow-hidden rounded-2xl bg-[#0a0a0b] sm:rounded-[28px]">
           <motion.div
             className="h-full w-full"
@@ -505,7 +492,7 @@ function MotionCard({
           >
             <LazyVideo
               src={src}
-              poster="/images/work-portfolio.jpg"
+              poster="/images/works-ticker-poster.jpg"
               className="h-full w-full object-cover"
               autoPlay
               muted

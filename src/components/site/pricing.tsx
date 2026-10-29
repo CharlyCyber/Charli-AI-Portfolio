@@ -104,7 +104,7 @@ const CUBA: Tier[] = [
    es el texto ÍNTEGRO de v1.20 que recorre la banda lima (marquee
    hacia la IZQUIERDA a 50 px/s — Recovery-6), `meta` un descriptor
    corto (solo escritorio) e `img` la foto de la franja. El clic
-   navega a #contacto — SmoothScroll (Lenis) intercepta el ancla y
+   navega a #proyecto-en-mente — SmoothScroll (Lenis) intercepta el ancla y
    la anima con offset -90; en táctil, el primer toque activa la
    franja (la extensión vive dentro del FlowingMenu). */
 type Condition = {
@@ -151,13 +151,13 @@ const CONDITIONS: Condition[] = [
 
 /* Derivado a nivel de módulo (referencia estable entre renders):
    `text` = palabra en reposo, `marquee` = frase que recorre la
-   banda lima, `image` = foto de la franja, `link` = ancla #contacto. */
+   banda lima, `image` = foto de la franja, `link` = ancla #proyecto-en-mente. */
 const COND_ITEMS: FlowingMenuItem[] = CONDITIONS.map((c) => ({
   text: c.title,
   marquee: c.phrase,
   meta: c.meta,
   image: c.img,
-  link: "#contacto",
+  link: "#proyecto-en-mente",
 }));
 
 /* Marco anti-CLS: reserva la altura exacta de las 5 franjas
@@ -332,7 +332,7 @@ export function Pricing() {
                 <div className="mt-auto pt-8">
                   <FlipGroup className="block">
                     <a
-                      href="#contacto"
+                      href="#proyecto-en-mente"
                       className={`group inline-flex w-full items-center justify-center gap-1.5 rounded-full px-6 py-3.5 text-[14px] font-semibold transition-transform duration-300 hover:scale-[1.02] active:scale-95 ${
                         t.featured
                           ? "bg-lime text-ink"
@@ -360,7 +360,7 @@ export function Pricing() {
         {/* Condiciones comerciales — franjas interactivas (FlowingMenu):
             cada condición es una franja; hover/toque despliega la banda
             lima con la frase completa recorriendo hacia la IZQUIERDA
-            (50 px/s) y el clic navega a #contacto. */}
+            (50 px/s) y el clic navega a #proyecto-en-mente. */}
         <Reveal className="mt-16" y={44}>
           <div className="flex flex-wrap items-center justify-between gap-3">
             <h3 className="text-xl font-semibold tracking-tight sm:text-2xl">
