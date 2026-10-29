@@ -22,8 +22,9 @@ servicios, proyectos, tarifas (CUP/USD) y contacto — íntegramente en español
 > y adaptado a CHARLI AI · Scroll horizontal inspirado en [Matt Perry](https://twitter.com/mattgperry)
 > (componente de 21st.dev) · Tarjetas apiladas inspiradas en Skiper 17 (StickyCard_002) ·
 > Trazo que se dibuja con el scroll inspirado en Skiper 19 (ApidejOj) · Hover-img de
-> servicios inspirado en Obsidian UI (hover-img.json) · Fondo Threads y tarjeta elástica
-> Lanyard: React Bits (WebGL/three.js, reimplementados en TypeScript) · Trazo manuscrito
+> servicios inspirado en Obsidian UI (hover-img.json) · Fondo Threads: React Bits
+> (versión oficial TS+CSS en WebGL2) · Tarjeta elástica Lanyard: React Bits
+> (three.js, reimplementada en TypeScript) · Trazo manuscrito
 > del título: adaptación de "Hand Written Title" de KokonotUI (hand-writing-text.tsx) ·
 > FlowingMenu: React Bits (flowing-menu.tsx, con extensión táctil propia) · Squares:
 > React Bits (squares.tsx)

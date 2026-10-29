@@ -8,8 +8,9 @@
    skill bars, credenciales) superpuesta.
    ── v1.44 ──
    Los slides viajan TRANSPARENTES sobre una capa de fondo oscura
-   fija (bg #0f1011 con el WebGL Threads de hilos blancos — reacciona
-   al cursor, al scroll y, en móvil, al giroscopio) pasada por la
+   fija (bg #0f1011 con el WebGL Threads de hilos blancos; en v1.47,
+   la versión oficial de React Bits — manojo ondulante a 25° que
+   reacciona al cursor) pasada por la
    prop `background` del HorizontalScroll; las palabras gigantes son
    text-paper y las tarjetas de info usan la paleta papel sobre ese
    fondo oscuro. El header (título «Quién soy» envuelto en el trazo
@@ -162,18 +163,34 @@ export function AboutHorizontal() {
     <HorizontalScroll
       id="quien-soy"
       slides={SLIDES}
-      /* Fondo oscuro de todo el tramo: #0f1011 + hilos blancos de
-         Threads (blanco + defaults, como lo configuró el usuario). La
-         cadena de h-full (div → host de Threads) hace que el canvas
-         llene el wrapper h-screen del HorizontalScroll: el host de
-         Threads no tiene altura propia y sin ella el canvas quedaría
-         en su alto intrínseco (150px), no a pantalla completa. */
+      /* Fondo oscuro de todo el tramo (01 AUTODIDACTA → 05 DISEÑO):
+         #0f1011 + Threads (v1.47: la versión oficial de React Bits,
+         con las props EXACTAS del ejemplo del usuario — manojo de
+         hilos blancos a 25° que ondulan y reaccionan al cursor).
+         Sustituye al Threads propio anterior de rayas verticales
+         soleadas. h-full en el wrapper para que el canvas llene el
+         wrapper h-screen del HorizontalScroll. */
       background={
         <div className="h-full bg-[#0f1011]">
-          {/* v1.45: brillo y grosor un punto por encima del
-              default — con el DPR ya sin capar a 1,5 los hilos
-              (las ondas) recuperan la definición HD sin velarse */}
-          <Threads color="#ffffff" brightness={1.25} thickness={1.6} className="h-full" />
+          <Threads
+            color="#ffffff"
+            lineCount={90}
+            thickness={0.6}
+            softness={1.3}
+            amplitude={1.7}
+            distance={0.4}
+            waves={1.05}
+            speed={0.6}
+            split={0.04}
+            fray={0.5}
+            angle={25}
+            taper={0.85}
+            brightness={1.4}
+            parting={0}
+            enableMouseInteraction={true}
+            fade={0}
+            opacity={1}
+          />
         </div>
       }
       wordClassName="text-paper"
