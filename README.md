@@ -41,10 +41,12 @@ servicios, proyectos, tarifas (CUP/USD) y contacto — íntegramente en español
   **Contenido Global, 49 USD/mes**, ambos "tarifa de lanzamiento", con
   especificación de los vídeos Motion Graphics (2/mes, 9:16, 6–10 s),
   límites y condiciones de los planes; **03 Automatización & Bots** y
-  **04 Sistemas & Análisis** listan sus servicios con tarjeta e icono,
-  sin precios inventados: fila "Tarifa: cotización personalizada…" con
-  **CTA «Solicitar cotización»**, bloque de infraestructura/condiciones
-  técnicas (priorizar planes free y serverless) y la nota comercial.
+  **04 Sistemas & Análisis** listan sus servicios con las mismas tarjetas
+  GradientBlobCard de borde animado que las principales (icono, «Cotización»
+  en grande en el hueco del precio — sin precios inventados — y botón
+  **«Solicitar cotización»** por tarjeta), nota de tarifa bajo la rejilla,
+  bloque de infraestructura/condiciones técnicas (priorizar planes free
+  y serverless) y la nota comercial.
   Las Condiciones comerciales (FlowingMenu) siguen cerrando la sección
   para todas las categorías.
 

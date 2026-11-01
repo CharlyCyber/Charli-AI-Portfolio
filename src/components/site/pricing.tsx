@@ -316,9 +316,9 @@ function InfoCard({
       transition={{ duration: 0.55, delay, ease: EASE_OUT }}
       className="h-full rounded-[24px] border border-black/[0.08] bg-white p-6"
     >
-      <h4 className="text-[12.5px] font-semibold uppercase tracking-[0.12em]">
-        <SpecialText>{title}</SpecialText>
-      </h4>
+      {/* Título en texto plano: SpecialText no envuelve líneas
+          (whitespace-pre) y estos títulos son largos */}
+      <h4 className="text-[12.5px] font-semibold uppercase tracking-[0.12em]">{title}</h4>
       <div className="mt-4">{children}</div>
     </motion.section>
   );
@@ -349,63 +349,64 @@ function ContenidoPanel({ currency }: { currency: CurrencyTab }) {
           animate={{ opacity: 1, y: 0 }}
           exit={{ opacity: 0, y: -18 }}
           transition={{ duration: 0.5, ease: EASE_OUT }}
-          className="relative mx-auto mt-10 max-w-4xl"
+          className="relative mx-auto mt-10 w-full max-w-md"
         >
           <span className="absolute -top-3 left-7 z-20 rounded-full bg-lime px-3.5 py-1 text-[11px] font-semibold uppercase tracking-[0.12em] text-ink">
             <SpecialText inView>Tarifa de lanzamiento</SpecialText>
           </span>
-          <GradientBlobCard tone="dark" blobDelay={0}>
-            <div className="grid gap-9 p-7 text-white sm:p-9 lg:grid-cols-[1fr_1.35fr]">
-              <div className="flex flex-col">
-                <p className="text-[11.5px] font-semibold uppercase tracking-[0.16em] text-lime">
-                  <SpecialText inView speed={15}>{plan.tag}</SpecialText>
-                </p>
-                <h3 className="mt-2.5 text-[22px] font-semibold tracking-tight">
-                  <SpecialText inView speed={17}>{plan.name}</SpecialText>
-                </h3>
-                <p className="mt-4 flex items-baseline gap-2">
-                  <span className="text-[clamp(2.4rem,4vw,3.4rem)] font-medium leading-none tracking-tight text-lime">
-                    {plan.price}
-                  </span>
-                  <span className="text-[13px] font-medium text-white/60">
-                    <SpecialText inView delay={0.3}>{plan.currency}</SpecialText>
-                  </span>
-                </p>
-                <p className="mt-4 text-[13.5px] leading-relaxed text-white/75">
-                  {plan.description}
-                </p>
-                <p className="mt-4 text-[12.5px] leading-relaxed text-white/60">
-                  <span className="font-semibold text-white/85">Ideal para: </span>
-                  {plan.ideal}
-                </p>
-                <div className="mt-auto pt-8">
-                  <FlipGroup className="block">
-                    <a
-                      href="#proyecto-en-mente"
-                      className="group inline-flex w-full items-center justify-center gap-1.5 rounded-full bg-lime px-6 py-3.5 text-[14px] font-semibold text-ink transition-transform duration-300 hover:scale-[1.02] active:scale-95"
-                    >
-                      <span>{flipWords("Empezar proyecto")}</span>
-                      <ArrowUpRight className="size-4 transition-transform duration-300 group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
-                    </a>
-                  </FlipGroup>
-                </div>
-              </div>
-              <div>
-                <p className="text-[12.5px] font-semibold uppercase tracking-[0.12em] text-white/85">
-                  <SpecialText inView>Incluye cada mes</SpecialText>
-                </p>
-                <ul className="mt-4 space-y-3">
-                  {plan.features.map((f, fi) => (
-                    <li key={f} className="fm-wrap flex items-start gap-2.5 text-[13.5px] leading-snug">
-                      <span className="mt-0.5 grid size-[18px] shrink-0 place-items-center rounded-full bg-lime/20 text-lime">
-                        <Check className="size-3" strokeWidth={2.5} />
-                      </span>
-                      <span className="text-white/80">
-                        <SpecialText inView delay={0.2 + fi * 0.05} speed={11}>{f}</SpecialText>
-                      </span>
-                    </li>
-                  ))}
-                </ul>
+          <GradientBlobCard tone="dark" blobDelay={0} className="h-full">
+            {/* Misma composición en una columna que las tarjetas
+                principales (encuadre probado a cualquier ancho).
+                Las frases de «Incluye» van en texto PLANO, sin
+                SpecialText: ese efecto es `whitespace-pre` pensado
+                para etiquetas cortas y en frases largas no envuelve
+                líneas — el texto se salía de la tarjeta y quedaba
+                recortado por su overflow-hidden. */}
+            <div className="flex h-full flex-col p-7 text-white sm:p-8">
+              <p className="text-[11.5px] font-semibold uppercase tracking-[0.16em] text-lime">
+                <SpecialText inView speed={15}>{plan.tag}</SpecialText>
+              </p>
+              <h3 className="mt-2.5 text-[15px] font-semibold uppercase tracking-[0.1em] opacity-80">
+                <SpecialText inView speed={17}>{plan.name}</SpecialText>
+              </h3>
+              <p className="mt-4 flex items-baseline gap-2">
+                <span className="text-[clamp(2.4rem,4vw,3.4rem)] font-medium leading-none tracking-tight text-lime">
+                  {plan.price}
+                </span>
+                <span className="text-[13px] font-medium text-white/60">
+                  <SpecialText inView delay={0.3}>{plan.currency}</SpecialText>
+                </span>
+              </p>
+              <p className="mt-4 text-[13.5px] leading-relaxed text-white/75">
+                {plan.description}
+              </p>
+              <p className="mt-7 text-[12.5px] font-semibold uppercase tracking-[0.12em] text-white/85">
+                <SpecialText inView>Incluye cada mes</SpecialText>
+              </p>
+              <ul className="mt-4 space-y-3">
+                {plan.features.map((f) => (
+                  <li key={f} className="flex items-start gap-2.5 text-[13.5px] leading-snug">
+                    <span className="mt-0.5 grid size-[18px] shrink-0 place-items-center rounded-full bg-lime/20 text-lime">
+                      <Check className="size-3" strokeWidth={2.5} />
+                    </span>
+                    <span className="min-w-0 text-white/80">{f}</span>
+                  </li>
+                ))}
+              </ul>
+              <p className="mt-6 text-[12.5px] leading-relaxed text-white/60">
+                <span className="font-semibold text-white/85">Ideal para: </span>
+                {plan.ideal}
+              </p>
+              <div className="mt-auto pt-8">
+                <FlipGroup className="block">
+                  <a
+                    href="#proyecto-en-mente"
+                    className="group inline-flex w-full items-center justify-center gap-1.5 rounded-full bg-lime px-6 py-3.5 text-[14px] font-semibold text-ink transition-transform duration-300 hover:scale-[1.02] active:scale-95"
+                  >
+                    <span>{flipWords("Empezar proyecto")}</span>
+                    <ArrowUpRight className="size-4 transition-transform duration-300 group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
+                  </a>
+                </FlipGroup>
               </div>
             </div>
           </GradientBlobCard>
@@ -543,7 +544,7 @@ function Infraestructura() {
       className="mt-5 rounded-[24px] border border-black/[0.08] bg-white p-6 sm:p-7"
     >
       <h4 className="text-[12.5px] font-semibold uppercase tracking-[0.12em]">
-        <SpecialText>Infraestructura y condiciones técnicas</SpecialText>
+        Infraestructura y condiciones técnicas
       </h4>
       <ul className="mt-4 grid gap-x-8 gap-y-2.5 text-[13px] leading-relaxed text-ink-soft md:grid-cols-2">
         {INFRA_POINTS.map((t) => (
@@ -571,47 +572,68 @@ function ServiciosPanel({ data }: { data: ServiceGroup }) {
       >
         {data.intro}
       </motion.p>
+      {/* v1.49 (ajuste): las tarjetas de servicios visten el MISMO
+          GradientBlobCard con borde animado que las principales de
+          Web & Desarrollo. Como estos servicios no tienen precio
+          fijo (documento del cliente), el hueco del precio muestra
+          «Cotización» en grande — visible en cada tarjeta — con su
+          botón «Solicitar cotización», igual que el «Empezar
+          proyecto» de las principales. Títulos y textos en plano
+          (SpecialText no envuelve y desbordaría). */}
       <div className="mt-8 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
         {data.services.map((s, i) => (
           <motion.article
             key={s.title}
-            initial={{ opacity: 0, y: 30 }}
+            initial={{ opacity: 0, y: 36 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.55, delay: 0.05 + i * 0.07, ease: EASE_OUT }}
-            className="h-full rounded-[24px] border border-black/[0.08] bg-white p-6"
+            transition={{ duration: 0.6, delay: 0.05 + i * 0.08, ease: EASE_OUT }}
+            className="relative h-full"
           >
-            <span className="grid size-10 place-items-center rounded-full bg-paper-dim text-ink">
-              <s.icon className="size-[18px]" strokeWidth={2} />
-            </span>
-            <h4 className="mt-4 text-[15px] font-semibold tracking-tight">
-              <SpecialText inView delay={i * 0.05} speed={16}>{s.title}</SpecialText>
-            </h4>
-            <p className="mt-2 text-[13.5px] leading-relaxed text-ink-soft">{s.text}</p>
+            <GradientBlobCard tone="light" blobDelay={-i * 1.7} className="h-full">
+              <div className="flex h-full flex-col p-7">
+                <span className="grid size-10 place-items-center rounded-full bg-paper-dim text-ink">
+                  <s.icon className="size-[18px]" strokeWidth={2} />
+                </span>
+                <h4 className="mt-4 text-[15px] font-semibold uppercase tracking-[0.1em] opacity-80">
+                  {s.title}
+                </h4>
+                <p className="mt-4 flex items-baseline gap-2">
+                  <span className="text-[clamp(1.9rem,3vw,2.5rem)] font-medium leading-none tracking-tight">
+                    Cotización
+                  </span>
+                </p>
+                <p className="mt-1.5 text-[12.5px] font-medium text-ink-soft">
+                  según alcance del proyecto
+                </p>
+                <p className="mt-4 text-[13.5px] leading-relaxed text-ink-soft">{s.text}</p>
+                <div className="mt-auto pt-8">
+                  <FlipGroup className="block">
+                    <a
+                      href="#proyecto-en-mente"
+                      className="group inline-flex w-full items-center justify-center gap-1.5 rounded-full bg-ink px-6 py-3.5 text-[14px] font-semibold text-white transition-transform duration-300 hover:scale-[1.02] active:scale-95"
+                    >
+                      <span>{flipWords("Solicitar cotización")}</span>
+                      <ArrowUpRight className="size-4 transition-transform duration-300 group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
+                    </a>
+                  </FlipGroup>
+                </div>
+              </div>
+            </GradientBlobCard>
           </motion.article>
         ))}
       </div>
-      <motion.div
-        initial={{ opacity: 0, y: 28 }}
+      {/* La explicación de la tarifa queda como nota bajo la
+          rejilla (el «Solicitar cotización» vive ya en cada
+          tarjeta, como el CTA de las principales) */}
+      <motion.p
+        initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.55, delay: 0.15, ease: EASE_OUT }}
-        className="mt-5 flex flex-wrap items-center justify-between gap-5 rounded-[24px] bg-ink p-6 text-white sm:p-7"
+        className="mt-8 text-center text-[12.5px] leading-relaxed text-ink-soft"
       >
-        <div className="min-w-56 max-w-xl">
-          <p className="text-[11.5px] font-semibold uppercase tracking-[0.16em] text-lime">
-            <SpecialText inView>Tarifa</SpecialText>
-          </p>
-          <p className="mt-2 text-[13.5px] leading-relaxed text-white/80">{data.tarifa}</p>
-        </div>
-        <FlipGroup>
-          <a
-            href="#proyecto-en-mente"
-            className="group inline-flex items-center justify-center gap-1.5 rounded-full bg-lime px-6 py-3.5 text-[14px] font-semibold text-ink transition-transform duration-300 hover:scale-[1.02] active:scale-95"
-          >
-            <span>{flipWords("Solicitar cotización")}</span>
-            <ArrowUpRight className="size-4 transition-transform duration-300 group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
-          </a>
-        </FlipGroup>
-      </motion.div>
+        <span className="font-semibold uppercase tracking-[0.12em] text-ink">Tarifa: </span>
+        {data.tarifa}
+      </motion.p>
       <Infraestructura />
     </div>
   );
