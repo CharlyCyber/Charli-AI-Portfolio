@@ -29,6 +29,27 @@ servicios, proyectos, tarifas (CUP/USD) y contacto — íntegramente en español
 > FlowingMenu: React Bits (flowing-menu.tsx, con extensión táctil propia) · Squares:
 > React Bits (squares.tsx)
 
+## ✨ Novedades v1.49 — Cuatro pestañas en Tarifas: Contenido, Automatización y Sistemas
+
+- **Tarifas se organiza en 4 pestañas** (contenido íntegro según el
+  documento de actualización de tarifas del cliente), sin tocar ninguna
+  otra sección: **01 Web & Desarrollo** conserva exactamente la oferta
+  actual (20.000/40.000/60.000 CUP y $250/$400/$600, mismas tarjetas
+  GradientBlobCard y pestañas CUP/USD de cabecera); **02 Contenido &
+  Creatividad** estrena suscripciones mensuales usando las MISMAS pestañas
+  Nacional/CUP · Internacional/USD — **Impulso Digital, 9.500 CUP/mes** y
+  **Contenido Global, 49 USD/mes**, ambos "tarifa de lanzamiento", con
+  especificación de los vídeos Motion Graphics (2/mes, 9:16, 6–10 s),
+  límites y condiciones de los planes; **03 Automatización & Bots** y
+  **04 Sistemas & Análisis** listan sus servicios con las mismas tarjetas
+  GradientBlobCard de borde animado que las principales (icono, «Cotización»
+  en grande en el hueco del precio — sin precios inventados — y botón
+  **«Solicitar cotización»** por tarjeta), nota de tarifa bajo la rejilla,
+  bloque de infraestructura/condiciones técnicas (priorizar planes free
+  y serverless) y la nota comercial.
+  Las Condiciones comerciales (FlowingMenu) siguen cerrando la sección
+  para todas las categorías.
+
 ## ✨ Novedades v1.48 — Marquesina curva visible desde el primer pintado
 
 - **Las letras curvas ya no dependen de la hidratación**: tras el despliegue
