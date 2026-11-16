@@ -105,6 +105,15 @@ const WORKS: Work[] = [
     year: "2026",
     niche: "Diseño Web",
   },
+  {
+    name: "WebADN",
+    desc: "Compilador de contexto e ingeniería inversa para agentes de IA: extrae el ADN visual y de movimiento de cualquier web y genera un kit listo para construir y medir.",
+    img: "/images/work-webadn.jpg",
+    alt: "Dashboard de WebADN: vista Extraer con formulario de web de referencia, nicho y botón de acción en acento lima",
+    repo: "CharlyCyber/WebADN",
+    year: "2026",
+    niche: "AI DevTools",
+  },
 ];
 
 /* ── Chip de repositorio: comando `gh repo clone` + copiar ──── */
